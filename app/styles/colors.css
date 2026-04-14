@@ -1,0 +1,22 @@
+@theme {
+  --color-*: initial;
+
+  --color-white: #ffffff;
+  --color-black: #0b0b0b;
+
+  --color-gray-10: #f7f7f9;
+  --color-gray-20: #ececf3;
+  --color-gray-30: #d1d5df;
+  --color-gray-40: #b2b6c1;
+  --color-gray-50: #9094a2;
+  --color-gray-60: #707585;
+  --color-gray-70: #4e5364;
+  --color-gray-80: #3b3f4d;
+  --color-gray-90: #27272e;
+
+  --color-red-10: #f55a67;
+  --color-red-20: #de595c;
+
+  --color-green-10: #6ab661;
+  --color-green-20: #31a851;
+}

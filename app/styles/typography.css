@@ -1,0 +1,72 @@
+@theme {
+  --font-sans: var(--font-pretendard);
+
+  /* heading */
+  --text-head-22b: 22px;
+  --text-head-22b--font-weight: 700;
+
+  --text-head-22sb: 22px;
+  --text-head-22sb--font-weight: 600;
+
+  --text-head-20b: 20px;
+  --text-head-20b--font-weight: 700;
+
+  --text-head-20sb: 20px;
+  --text-head-20sb--font-weight: 600;
+
+  --text-head-20m: 20px;
+  --text-head-20m--font-weight: 500;
+
+  --text-head-18b: 18px;
+  --text-head-18b--font-weight: 700;
+
+  --text-head-18sb: 18px;
+  --text-head-18sb--font-weight: 600;
+
+  --text-head-18m: 18px;
+  --text-head-18m--font-weight: 500;
+
+  /* body */
+  --text-body-16b: 16px;
+  --text-body-16b--font-weight: 700;
+
+  --text-body-16sb: 16px;
+  --text-body-16sb--font-weight: 600;
+
+  --text-body-16m: 16px;
+  --text-body-16m--font-weight: 500;
+
+  --text-body-15b: 15px;
+  --text-body-15b--font-weight: 700;
+
+  --text-body-15sb: 15px;
+  --text-body-15sb--font-weight: 600;
+
+  --text-body-15m: 15px;
+  --text-body-15m--font-weight: 500;
+
+  --text-body-14b: 14px;
+  --text-body-14b--font-weight: 700;
+
+  --text-body-14sb: 14px;
+  --text-body-14sb--font-weight: 600;
+
+  --text-body-14m: 14px;
+  --text-body-14m--font-weight: 500;
+
+  /* detail */
+  --text-detail-13b: 13px;
+  --text-detail-13b--font-weight: 700;
+
+  --text-detail-13sb: 13px;
+  --text-detail-13sb--font-weight: 600;
+
+  --text-detail-13m: 13px;
+  --text-detail-13m--font-weight: 500;
+
+  --text-detail-12sb: 12px;
+  --text-detail-12sb--font-weight: 600;
+
+  --text-detail-12m: 12px;
+  --text-detail-12m--font-weight: 500;
+}
