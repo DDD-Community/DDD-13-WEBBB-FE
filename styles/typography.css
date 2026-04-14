@@ -1,4 +1,6 @@
 @theme {
+  --text-*: initial;
+
   --font-sans: var(--font-pretendard);
 
   /* heading */

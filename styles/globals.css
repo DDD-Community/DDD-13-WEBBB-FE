@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@import "./styles/colors.css";
-@import "./styles/typography.css";
+@import "./colors.css";
+@import "./typography.css";
 
 html {
   line-height: 1.5;
