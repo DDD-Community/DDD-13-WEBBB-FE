@@ -1,0 +1,48 @@
+name: "🐛 Fix"
+description: 버그 수정 및 문제 제보를 위한 템플릿입니다.
+title: "[fix] "
+labels: ["bug"]
+body:
+  - type: input
+    id: bug-summary
+    attributes:
+      label: "📝 버그 내용"
+      description: "발생한 버그에 대해 간략히 설명해주세요"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "🚀 재현 방법"
+      description: "버그를 재현하기 위한 단계를 순서대로 작성해주세요"
+      value: |
+        1. 
+        2. 
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: todo
+    attributes:
+      label: "✅ TODO"
+      description: "버그 수정을 위해 필요한 작업 목록입니다"
+      value: |
+        - [ ]
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📸 스크린샷 (선택)"
+      description: "문제 상황을 파악할 수 있는 이미지를 드래그 앤 드롭으로 첨부해 주세요"
+    validations:
+      required: false
+
+  - type: textarea
+    id: env
+    attributes:
+      label: "🔎 참고 사항 및 환경"
+      placeholder: "OS, 브라우저 버전 또는 참고할 링크 등을 입력해주세요"
