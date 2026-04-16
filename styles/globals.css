@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "./colors.css";
+@import "./typography.css";
+
+html {
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+}
+
+body {
+  background: var(--color-white);
+  color: var(--color-black);
+}
