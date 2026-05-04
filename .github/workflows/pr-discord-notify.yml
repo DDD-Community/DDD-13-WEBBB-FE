@@ -148,7 +148,7 @@ jobs:
 
           BODY_FOR_DESC=""
           case "$KIND" in
-            opened|reopened|merged|closed) BODY_FOR_DESC=$(truncate_for_desc "$PR_BODY" "$PR_URL") ;;
+            opened|reopened|ready|merged|closed) BODY_FOR_DESC=$(truncate_for_desc "$PR_BODY" "$PR_URL") ;;
             review) BODY_FOR_DESC=$(truncate_for_desc "$REVIEW_BODY" "$PR_URL") ;;
             comment|review_comment) BODY_FOR_DESC=$(truncate_for_desc "$COMMENT_BODY" "$PR_URL") ;;
           esac
@@ -162,7 +162,7 @@ jobs:
           # ---------- Fields ----------
           FIELDS='[]'
           case "$KIND" in
-            opened|reopened|merged|closed)
+            opened|reopened|ready|merged|closed)
               FIELDS=$(jq -nc --arg head "$PR_HEAD" --arg base "$PR_BASE" \
                 '[{name:"Branch", value:("`"+$head+"` → `"+$base+"`"), inline:true}]') ;;
             review_comment)
