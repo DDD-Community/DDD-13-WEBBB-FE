@@ -1,0 +1,298 @@
+name: PR Discord Notify
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, closed]
+  pull_request_review:
+    types: [submitted]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+concurrency:
+  group: discord-notify-pr-${{ github.event.pull_request.number || github.event.issue.number }}
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'issue_comment' || github.event.issue.pull_request != null }}
+    env:
+      WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK_URL }}
+      USER_MAP: ${{ secrets.DISCORD_USER_MAP }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      EVENT_NAME: ${{ github.event_name }}
+      EVENT_ACTION: ${{ github.event.action }}
+    steps:
+      - name: Notify Discord
+        run: |
+          set -euo pipefail
+
+          if [ -z "${WEBHOOK:-}" ]; then
+            echo "DISCORD_PR_WEBHOOK_URL not set; skipping."
+            exit 0
+          fi
+
+          E="$GITHUB_EVENT_PATH"
+
+          # ---------- Pull common PR fields from event payload ----------
+          PR_NUMBER=$(jq -r '.pull_request.number // .issue.number' "$E")
+          PR_TITLE=$(jq -r '.pull_request.title // .issue.title' "$E")
+          PR_URL=$(jq -r '.pull_request.html_url // .issue.html_url' "$E")
+          PR_BODY=$(jq -r '.pull_request.body // ""' "$E")
+          PR_AUTHOR=$(jq -r '.pull_request.user.login // .issue.user.login' "$E")
+          PR_AUTHOR_AVATAR=$(jq -r '.pull_request.user.avatar_url // .issue.user.avatar_url' "$E")
+          PR_MERGED=$(jq -r '.pull_request.merged // false' "$E")
+          PR_HEAD=$(jq -r '.pull_request.head.ref // ""' "$E")
+          PR_BASE=$(jq -r '.pull_request.base.ref // ""' "$E")
+
+          # ---------- Per-event actor / extra fields ----------
+          REVIEW_STATE=""; REVIEW_BODY=""
+          COMMENT_BODY=""; COMMENT_PATH=""; COMMENT_LINE=""
+          case "$EVENT_NAME" in
+            pull_request_review)
+              ACTOR=$(jq -r '.review.user.login' "$E")
+              ACTOR_AVATAR=$(jq -r '.review.user.avatar_url' "$E")
+              REVIEW_STATE=$(jq -r '.review.state' "$E")
+              REVIEW_BODY=$(jq -r '.review.body // ""' "$E")
+              ;;
+            issue_comment)
+              ACTOR=$(jq -r '.comment.user.login' "$E")
+              ACTOR_AVATAR=$(jq -r '.comment.user.avatar_url' "$E")
+              COMMENT_BODY=$(jq -r '.comment.body // ""' "$E")
+              # Skip our own sticky comment to avoid loops (defensive — GITHUB_TOKEN
+              # comments don't normally re-trigger workflows).
+              if [ "$ACTOR" = "github-actions[bot]" ]; then
+                echo "Skipping bot comment"; exit 0
+              fi
+              ;;
+            pull_request_review_comment)
+              ACTOR=$(jq -r '.comment.user.login' "$E")
+              ACTOR_AVATAR=$(jq -r '.comment.user.avatar_url' "$E")
+              COMMENT_BODY=$(jq -r '.comment.body // ""' "$E")
+              COMMENT_PATH=$(jq -r '.comment.path // ""' "$E")
+              COMMENT_LINE=$(jq -r '.comment.line // .comment.original_line // empty' "$E")
+              ;;
+            *)
+              ACTOR=$(jq -r '.sender.login' "$E")
+              ACTOR_AVATAR=$(jq -r '.sender.avatar_url' "$E")
+              ;;
+          esac
+
+          # ---------- Discord mention lookup ----------
+          DISCORD_ID=""
+          if [ -n "${USER_MAP:-}" ]; then
+            DISCORD_ID=$(jq -nr --arg login "$ACTOR" --argjson m "$USER_MAP" \
+              '$m[$login] // empty' 2>/dev/null || true)
+          fi
+          if [ -n "$DISCORD_ID" ]; then
+            CONTENT="<@$DISCORD_ID>"
+            ALLOWED=$(jq -nc --arg id "$DISCORD_ID" '{users: [$id]}')
+          else
+            CONTENT="@$ACTOR"
+            ALLOWED='{"users": []}'
+          fi
+
+          # ---------- Title + color per event ----------
+          C_OPEN=3447003; C_MERGED=7291607; C_CLOSED=13312049
+          C_APPROVED=2664261; C_CHANGES=14105417; C_NEUTRAL=6976381
+
+          KIND=""; TITLE=""; COLOR=$C_NEUTRAL
+          case "$EVENT_NAME" in
+            pull_request)
+              case "$EVENT_ACTION" in
+                opened)
+                  KIND=opened; TITLE="Pull Request Opened by $ACTOR"; COLOR=$C_OPEN ;;
+                reopened)
+                  KIND=reopened; TITLE="Pull Request Reopened by $ACTOR"; COLOR=$C_OPEN ;;
+                ready_for_review)
+                  KIND=ready; TITLE="Pull Request Ready for Review"; COLOR=$C_OPEN ;;
+                closed)
+                  if [ "$PR_MERGED" = "true" ]; then
+                    KIND=merged; TITLE="Pull Request Merged"; COLOR=$C_MERGED
+                  else
+                    KIND=closed; TITLE="Pull Request Closed by $ACTOR"; COLOR=$C_CLOSED
+                  fi ;;
+                *) echo "Unhandled pull_request action: $EVENT_ACTION"; exit 0 ;;
+              esac ;;
+            pull_request_review)
+              case "$REVIEW_STATE" in
+                approved)
+                  KIND=review; TITLE="Pull Request Approved by $ACTOR"; COLOR=$C_APPROVED ;;
+                changes_requested)
+                  KIND=review; TITLE="Changes Requested by $ACTOR"; COLOR=$C_CHANGES ;;
+                *)
+                  KIND=review; TITLE="Pull Request Reviewed by $ACTOR"; COLOR=$C_NEUTRAL ;;
+              esac ;;
+            issue_comment)
+              KIND=comment; TITLE="Comment by $ACTOR"; COLOR=$C_NEUTRAL ;;
+            pull_request_review_comment)
+              KIND=review_comment; TITLE="Code Comment by $ACTOR"; COLOR=$C_NEUTRAL ;;
+          esac
+
+          # ---------- Build description (with truncation) ----------
+          MAX_BODY=600
+          truncate_for_desc() {
+            local body="$1" url="$2"
+            if [ -z "$body" ]; then echo ""; return; fi
+            if [ "${#body}" -gt "$MAX_BODY" ]; then
+              printf '%s… [전체 보기](%s)' "${body:0:$MAX_BODY}" "$url"
+            else
+              printf '%s' "$body"
+            fi
+          }
+
+          PR_REF=$(jq -nr --arg n "$PR_NUMBER" --arg t "$PR_TITLE" --arg u "$PR_URL" \
+            '"[#" + $n + " " + $t + "](" + $u + ")"')
+
+          BODY_FOR_DESC=""
+          case "$KIND" in
+            opened|reopened|merged|closed) BODY_FOR_DESC=$(truncate_for_desc "$PR_BODY" "$PR_URL") ;;
+            review)         BODY_FOR_DESC=$(truncate_for_desc "$REVIEW_BODY" "$PR_URL") ;;
+            comment|review_comment) BODY_FOR_DESC=$(truncate_for_desc "$COMMENT_BODY" "$PR_URL") ;;
+          esac
+
+          if [ -n "$BODY_FOR_DESC" ]; then
+            DESC="$PR_REF"$'\n\n'"$BODY_FOR_DESC"
+          else
+            DESC="$PR_REF"
+          fi
+
+          # ---------- Fields ----------
+          FIELDS='[]'
+          case "$KIND" in
+            opened|reopened|merged|closed)
+              FIELDS=$(jq -nc --arg head "$PR_HEAD" --arg base "$PR_BASE" \
+                '[{name:"Branch", value:("`"+$head+"` → `"+$base+"`"), inline:true}]') ;;
+            review_comment)
+              if [ -n "$COMMENT_LINE" ]; then
+                LOC="\`$COMMENT_PATH\`:$COMMENT_LINE"
+              else
+                LOC="\`$COMMENT_PATH\`"
+              fi
+              FIELDS=$(jq -nc --arg loc "$LOC" '[{name:"Location", value:$loc, inline:true}]') ;;
+          esac
+
+          # ---------- Build embed payload ----------
+          build_payload() {
+            local title="$1" desc="$2" color="$3" author_name="$4" author_icon="$5" \
+                  fields="$6" content="$7" allowed="$8"
+            jq -nc \
+              --arg content "$content" \
+              --arg title "$title" \
+              --arg url "$PR_URL" \
+              --arg desc "$desc" \
+              --arg name "$author_name" \
+              --arg icon "$author_icon" \
+              --argjson color "$color" \
+              --argjson fields "$fields" \
+              --argjson allowed "$allowed" \
+              '{
+                content: $content,
+                allowed_mentions: $allowed,
+                embeds: [{
+                  title: $title,
+                  url: $url,
+                  description: $desc,
+                  color: $color,
+                  author: {name: $name, icon_url: $icon},
+                  fields: $fields
+                }]
+              }'
+          }
+
+          NOTIFY_PAYLOAD=$(build_payload "$TITLE" "$DESC" "$COLOR" \
+            "$ACTOR" "$ACTOR_AVATAR" "$FIELDS" "$CONTENT" "$ALLOWED")
+
+          # ---------- Read sticky meta (existing message_id) ----------
+          STICKY_PREFIX="<!-- discord-meta:"
+          EXISTING_META=$(gh pr view "$PR_NUMBER" --repo "$REPO" --json comments \
+            --jq ".comments[] | select(.body | startswith(\"$STICKY_PREFIX\")) | .body" \
+            2>/dev/null | head -n 1 || true)
+          MESSAGE_ID=""
+          if [ -n "$EXISTING_META" ]; then
+            MESSAGE_ID=$(printf '%s' "$EXISTING_META" \
+              | sed -n 's/.*"message_id":"\([^"]*\)".*/\1/p')
+          fi
+
+          post_msg() {
+            curl -sS -H "Content-Type: application/json" \
+              -X POST -d "$1" "$WEBHOOK"
+          }
+
+          patch_card() {
+            # Re-render the persistent open card with current PR state but
+            # using the close/merge/reopen title + color.
+            local card_title="$1" card_color="$2"
+            local card_body
+            card_body=$(truncate_for_desc "$PR_BODY" "$PR_URL")
+            local card_desc="$PR_REF"
+            if [ -n "$card_body" ]; then
+              card_desc="$card_desc"$'\n\n'"$card_body"
+            fi
+            local card_fields
+            card_fields=$(jq -nc --arg head "$PR_HEAD" --arg base "$PR_BASE" \
+              '[{name:"Branch", value:("`"+$head+"` → `"+$base+"`"), inline:true}]')
+            local card_payload
+            card_payload=$(jq -nc \
+              --arg title "$card_title" \
+              --arg url "$PR_URL" \
+              --arg desc "$card_desc" \
+              --arg name "$PR_AUTHOR" \
+              --arg icon "$PR_AUTHOR_AVATAR" \
+              --argjson color "$card_color" \
+              --argjson fields "$card_fields" \
+              '{
+                embeds: [{
+                  title: $title, url: $url, description: $desc, color: $color,
+                  author: {name: $name, icon_url: $icon}, fields: $fields
+                }]
+              }')
+            local code
+            code=$(curl -sS -o /dev/null -w "%{http_code}" \
+              -X PATCH -H "Content-Type: application/json" \
+              -d "$card_payload" "$WEBHOOK/messages/$MESSAGE_ID")
+            echo "PATCH $MESSAGE_ID → $code"
+          }
+
+          # ---------- Branch by KIND ----------
+          case "$KIND" in
+            opened)
+              if [ -n "$MESSAGE_ID" ]; then
+                # Already created earlier (workflow re-run?); just notify.
+                post_msg "$NOTIFY_PAYLOAD" >/dev/null
+                exit 0
+              fi
+              RESPONSE=$(curl -sS -H "Content-Type: application/json" \
+                -X POST -d "$NOTIFY_PAYLOAD" "$WEBHOOK?wait=true")
+              NEW_ID=$(printf '%s' "$RESPONSE" | jq -r '.id // empty')
+              if [ -z "$NEW_ID" ]; then
+                echo "Failed to capture message_id; response: $RESPONSE"
+                exit 0
+              fi
+              STICKY_BODY=$(printf '<!-- discord-meta:{"message_id":"%s"} -->\n🤖 Discord 알림 카드 생성됨' "$NEW_ID")
+              gh pr comment "$PR_NUMBER" --repo "$REPO" --body "$STICKY_BODY" >/dev/null
+              ;;
+            merged|closed)
+              if [ -n "$MESSAGE_ID" ]; then
+                patch_card "$TITLE" "$COLOR"
+              else
+                echo "No sticky message_id; skipping card update."
+              fi
+              post_msg "$NOTIFY_PAYLOAD" >/dev/null
+              ;;
+            reopened)
+              if [ -n "$MESSAGE_ID" ]; then
+                patch_card "Pull Request Opened by $PR_AUTHOR" "$C_OPEN"
+              fi
+              post_msg "$NOTIFY_PAYLOAD" >/dev/null
+              ;;
+            *)
+              post_msg "$NOTIFY_PAYLOAD" >/dev/null
+              ;;
+          esac
