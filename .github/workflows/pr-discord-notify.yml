@@ -72,18 +72,6 @@ jobs:
               ;;
           esac
 
-          # ---------- Mentions: all USER_MAP users except PR author ----------
-          USER_MAP_JSON="${USER_MAP:-}"
-          if [ -z "$USER_MAP_JSON" ] || ! printf '%s' "$USER_MAP_JSON" | jq empty 2>/dev/null; then
-            USER_MAP_JSON='{}'
-          fi
-
-          CONTENT=$(jq -nr --argjson m "$USER_MAP_JSON" --arg author "$PR_AUTHOR" \
-            '[$m | to_entries[] | select(.key != $author) | "<@" + .value + ">"] | join(" ")')
-          ALLOWED_IDS=$(jq -nc --argjson m "$USER_MAP_JSON" --arg author "$PR_AUTHOR" \
-            '[$m | to_entries[] | select(.key != $author) | .value]')
-          ALLOWED=$(jq -nc --argjson ids "$ALLOWED_IDS" '{users: $ids}')
-
           # ---------- Title + color per event ----------
           C_OPEN=3447003; C_MERGED=7291607; C_CLOSED=13312049
           C_APPROVED=2664261; C_CHANGES=14105417; C_NEUTRAL=6976381
@@ -93,6 +81,10 @@ jobs:
             pull_request)
               case "$EVENT_ACTION" in
                 opened)
+                  if [ "$(jq -r '.pull_request.draft' "$E")" = "true" ]; then
+                    echo "Draft PR opened; skipping notification."
+                    exit 0
+                  fi
                   KIND=opened; TITLE="Pull Request Opened by $ACTOR"; COLOR=$C_OPEN ;;
                 reopened)
                   KIND=reopened; TITLE="Pull Request Reopened by $ACTOR"; COLOR=$C_OPEN ;;
@@ -119,6 +111,24 @@ jobs:
               KIND=comment; TITLE="Comment by $ACTOR"; COLOR=$C_NEUTRAL ;;
             pull_request_review_comment)
               KIND=review_comment; TITLE="Code Comment by $ACTOR"; COLOR=$C_NEUTRAL ;;
+          esac
+
+          # ---------- Mentions (only on opened / reopened / ready_for_review) ----------
+          # 팀의 액션이 필요한 이벤트에만 ping. close/merge/review/comment는 임베드만.
+          CONTENT=""
+          ALLOWED='{"users":[]}'
+          case "$KIND" in
+            opened|reopened|ready)
+              USER_MAP_JSON="${USER_MAP:-}"
+              if [ -z "$USER_MAP_JSON" ] || ! printf '%s' "$USER_MAP_JSON" | jq empty 2>/dev/null; then
+                USER_MAP_JSON='{}'
+              fi
+              CONTENT=$(jq -nr --argjson m "$USER_MAP_JSON" --arg author "$PR_AUTHOR" \
+                '[$m | to_entries[] | select(.key != $author) | "<@" + .value + ">"] | join(" ")')
+              ALLOWED_IDS=$(jq -nc --argjson m "$USER_MAP_JSON" --arg author "$PR_AUTHOR" \
+                '[$m | to_entries[] | select(.key != $author) | .value]')
+              ALLOWED=$(jq -nc --argjson ids "$ALLOWED_IDS" '{users: $ids}')
+              ;;
           esac
 
           # ---------- Description (truncated) ----------
