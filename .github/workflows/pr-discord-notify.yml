@@ -16,7 +16,7 @@ jobs:
     if: ${{ github.event_name != 'issue_comment' || github.event.issue.pull_request != null }}
     env:
       WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK_URL }}
-      USER_MAP: ${{ vars.DISCORD_USER_MAP }}
+      USER_MAP: ${{ secrets.DISCORD_USER_MAP }}
       EVENT_NAME: ${{ github.event_name }}
       EVENT_ACTION: ${{ github.event.action }}
     steps:
