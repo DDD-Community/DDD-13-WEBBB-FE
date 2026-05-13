@@ -24,14 +24,22 @@ body:
       required: true
 
   - type: textarea
-    id: todo
+    id: actual-behavior
     attributes:
-      label: "✅ TODO"
-      description: "버그 수정을 위해 필요한 작업 목록입니다"
-      value: |
-        - [ ]
+      label: "❌ 실제 동작"
+      description: "현재 발생하고 있는 현상을 작성해주세요"
+      placeholder: "예: 버튼을 클릭해도 아무런 반응이 없습니다."
     validations:
-      required: false
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "✅ 기대 동작"
+      description: "원래라면 어떻게 동작해야 하는지 작성해주세요"
+      placeholder: "예: 버튼을 클릭하면 메인 페이지로 이동해야 합니다."
+    validations:
+      required: true
 
   - type: textarea
     id: screenshots
