@@ -1,0 +1,202 @@
+name: PR Discord Notify
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, closed]
+  pull_request_review:
+    types: [submitted]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'issue_comment' || github.event.issue.pull_request != null }}
+    env:
+      WEBHOOK: ${{ secrets.DISCORD_PR_WEBHOOK_URL }}
+      USER_MAP: ${{ secrets.DISCORD_USER_MAP }}
+      EVENT_NAME: ${{ github.event_name }}
+      EVENT_ACTION: ${{ github.event.action }}
+    steps:
+      - name: Notify Discord
+        run: |
+          set -euo pipefail
+
+          if [ -z "${WEBHOOK:-}" ]; then
+            echo "DISCORD_PR_WEBHOOK_URL not set; skipping."
+            exit 0
+          fi
+
+          E="$GITHUB_EVENT_PATH"
+
+          # ---------- Common PR fields ----------
+          PR_NUMBER=$(jq -r '.pull_request.number // .issue.number' "$E")
+          PR_TITLE=$(jq -r '.pull_request.title // .issue.title' "$E")
+          PR_URL=$(jq -r '.pull_request.html_url // .issue.html_url' "$E")
+          PR_BODY=$(jq -r '.pull_request.body // ""' "$E")
+          PR_AUTHOR=$(jq -r '.pull_request.user.login // .issue.user.login' "$E")
+          PR_MERGED=$(jq -r '.pull_request.merged // false' "$E")
+          PR_HEAD=$(jq -r '.pull_request.head.ref // ""' "$E")
+          PR_BASE=$(jq -r '.pull_request.base.ref // ""' "$E")
+
+          # ---------- Per-event actor / extras ----------
+          REVIEW_STATE=""; REVIEW_BODY=""
+          COMMENT_BODY=""; COMMENT_PATH=""; COMMENT_LINE=""
+          case "$EVENT_NAME" in
+            pull_request_review)
+              ACTOR=$(jq -r '.review.user.login' "$E")
+              ACTOR_AVATAR=$(jq -r '.review.user.avatar_url' "$E")
+              REVIEW_STATE=$(jq -r '.review.state' "$E")
+              REVIEW_BODY=$(jq -r '.review.body // ""' "$E")
+              ;;
+            issue_comment)
+              ACTOR=$(jq -r '.comment.user.login' "$E")
+              ACTOR_AVATAR=$(jq -r '.comment.user.avatar_url' "$E")
+              COMMENT_BODY=$(jq -r '.comment.body // ""' "$E")
+              if [ "$ACTOR" = "github-actions[bot]" ]; then
+                echo "Skipping bot comment"; exit 0
+              fi
+              ;;
+            pull_request_review_comment)
+              ACTOR=$(jq -r '.comment.user.login' "$E")
+              ACTOR_AVATAR=$(jq -r '.comment.user.avatar_url' "$E")
+              COMMENT_BODY=$(jq -r '.comment.body // ""' "$E")
+              COMMENT_PATH=$(jq -r '.comment.path // ""' "$E")
+              COMMENT_LINE=$(jq -r '.comment.line // .comment.original_line // empty' "$E")
+              ;;
+            *)
+              ACTOR=$(jq -r '.sender.login' "$E")
+              ACTOR_AVATAR=$(jq -r '.sender.avatar_url' "$E")
+              ;;
+          esac
+
+          # ---------- Title + color per event ----------
+          C_OPEN=3447003; C_MERGED=7291607; C_CLOSED=13312049
+          C_APPROVED=2664261; C_CHANGES=14105417; C_NEUTRAL=6976381
+
+          KIND=""; TITLE=""; COLOR=$C_NEUTRAL
+          case "$EVENT_NAME" in
+            pull_request)
+              case "$EVENT_ACTION" in
+                opened)
+                  if [ "$(jq -r '.pull_request.draft' "$E")" = "true" ]; then
+                    echo "Draft PR opened; skipping notification."
+                    exit 0
+                  fi
+                  KIND=opened; TITLE="Pull Request Opened by $ACTOR"; COLOR=$C_OPEN ;;
+                reopened)
+                  KIND=reopened; TITLE="Pull Request Reopened by $ACTOR"; COLOR=$C_OPEN ;;
+                ready_for_review)
+                  KIND=ready; TITLE="Pull Request Ready for Review"; COLOR=$C_OPEN ;;
+                closed)
+                  if [ "$PR_MERGED" = "true" ]; then
+                    KIND=merged; TITLE="Pull Request Merged"; COLOR=$C_MERGED
+                  else
+                    KIND=closed; TITLE="Pull Request Closed by $ACTOR"; COLOR=$C_CLOSED
+                  fi ;;
+                *) echo "Unhandled pull_request action: $EVENT_ACTION"; exit 0 ;;
+              esac ;;
+            pull_request_review)
+              case "$REVIEW_STATE" in
+                approved)
+                  KIND=review; TITLE="Pull Request Approved by $ACTOR"; COLOR=$C_APPROVED ;;
+                changes_requested)
+                  KIND=review; TITLE="Changes Requested by $ACTOR"; COLOR=$C_CHANGES ;;
+                *)
+                  KIND=review; TITLE="Pull Request Reviewed by $ACTOR"; COLOR=$C_NEUTRAL ;;
+              esac ;;
+            issue_comment)
+              KIND=comment; TITLE="Comment by $ACTOR"; COLOR=$C_NEUTRAL ;;
+            pull_request_review_comment)
+              KIND=review_comment; TITLE="Code Comment by $ACTOR"; COLOR=$C_NEUTRAL ;;
+          esac
+
+          # ---------- Mentions (only on opened / reopened / ready_for_review) ----------
+          # 팀의 액션이 필요한 이벤트에만 ping. close/merge/review/comment는 임베드만.
+          CONTENT=""
+          ALLOWED='{"users":[]}'
+          case "$KIND" in
+            opened|reopened|ready)
+              USER_MAP_JSON="${USER_MAP:-}"
+              if [ -z "$USER_MAP_JSON" ] || ! printf '%s' "$USER_MAP_JSON" | jq empty 2>/dev/null; then
+                USER_MAP_JSON='{}'
+              fi
+              CONTENT=$(jq -nr --argjson m "$USER_MAP_JSON" --arg author "$PR_AUTHOR" \
+                '[$m | to_entries[] | select(.key != $author) | "<@" + .value + ">"] | join(" ")')
+              ALLOWED_IDS=$(jq -nc --argjson m "$USER_MAP_JSON" --arg author "$PR_AUTHOR" \
+                '[$m | to_entries[] | select(.key != $author) | .value]')
+              ALLOWED=$(jq -nc --argjson ids "$ALLOWED_IDS" '{users: $ids}')
+              ;;
+          esac
+
+          # ---------- Description (truncated) ----------
+          MAX_BODY=600
+          truncate_for_desc() {
+            local body="$1" url="$2"
+            if [ -z "$body" ]; then echo ""; return; fi
+            if [ "${#body}" -gt "$MAX_BODY" ]; then
+              printf '%s… [전체 보기](%s)' "${body:0:$MAX_BODY}" "$url"
+            else
+              printf '%s' "$body"
+            fi
+          }
+
+          PR_REF=$(jq -nr --arg n "$PR_NUMBER" --arg t "$PR_TITLE" --arg u "$PR_URL" \
+            '"[#" + $n + " " + $t + "](" + $u + ")"')
+
+          BODY_FOR_DESC=""
+          case "$KIND" in
+            opened|reopened|ready|merged|closed) BODY_FOR_DESC=$(truncate_for_desc "$PR_BODY" "$PR_URL") ;;
+            review) BODY_FOR_DESC=$(truncate_for_desc "$REVIEW_BODY" "$PR_URL") ;;
+            comment|review_comment) BODY_FOR_DESC=$(truncate_for_desc "$COMMENT_BODY" "$PR_URL") ;;
+          esac
+
+          if [ -n "$BODY_FOR_DESC" ]; then
+            DESC="$PR_REF"$'\n\n'"$BODY_FOR_DESC"
+          else
+            DESC="$PR_REF"
+          fi
+
+          # ---------- Fields ----------
+          FIELDS='[]'
+          case "$KIND" in
+            opened|reopened|ready|merged|closed)
+              FIELDS=$(jq -nc --arg head "$PR_HEAD" --arg base "$PR_BASE" \
+                '[{name:"Branch", value:("`"+$head+"` → `"+$base+"`"), inline:true}]') ;;
+            review_comment)
+              if [ -n "$COMMENT_LINE" ]; then
+                LOC="\`$COMMENT_PATH\`:$COMMENT_LINE"
+              else
+                LOC="\`$COMMENT_PATH\`"
+              fi
+              FIELDS=$(jq -nc --arg loc "$LOC" '[{name:"Location", value:$loc, inline:true}]') ;;
+          esac
+
+          # ---------- Build payload + send ----------
+          PAYLOAD=$(jq -nc \
+            --arg content "$CONTENT" \
+            --arg title "$TITLE" \
+            --arg url "$PR_URL" \
+            --arg desc "$DESC" \
+            --arg name "$ACTOR" \
+            --arg icon "$ACTOR_AVATAR" \
+            --argjson color "$COLOR" \
+            --argjson fields "$FIELDS" \
+            --argjson allowed "$ALLOWED" \
+            '{
+              content: $content,
+              allowed_mentions: $allowed,
+              embeds: [{
+                title: $title,
+                url: $url,
+                description: $desc,
+                color: $color,
+                author: {name: $name, icon_url: $icon},
+                fields: $fields
+              }]
+            }')
+
+          curl -sS -H "Content-Type: application/json" \
+            -X POST -d "$PAYLOAD" "$WEBHOOK"
