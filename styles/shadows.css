@@ -1,0 +1,8 @@
+@theme {
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+
+  --shadow-1: 0px 4px 15px 0px #00000059;
+}
