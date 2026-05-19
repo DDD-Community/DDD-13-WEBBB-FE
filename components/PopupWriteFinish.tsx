@@ -15,7 +15,14 @@ export default function PopupWriteFinish({ isOpen, onClose, onConfirm }: PopupWr
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="relative flex h-[265px] w-[302px] shrink-0 flex-col items-center rounded-[12px] bg-white p-4">
         <div className="mt-4 mb-6 flex items-center justify-center">
-          <Image src="/popup_write_finish.svg" alt="완료 캐릭터" width={90} height={100} className="object-contain" />
+          <Image
+            src="/popup_write_finish.svg"
+            alt="완료 캐릭터"
+            width={90}
+            height={100}
+            className="h-auto object-contain"
+            priority
+          />
         </div>
 
         <h3 className="text-head-18sb mb-5 text-center leading-[150%] tracking-[-0.36px] text-black">
