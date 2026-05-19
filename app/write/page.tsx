@@ -6,6 +6,7 @@ import { useWriteStore } from "@/store/useWriteStore";
 import TopbarWrite from "@/components/TopbarWrite";
 import PopupWriteFinish from "@/components/PopupWriteFinish";
 import PopupWriteCancel from "@/components/PopupWriteCancel";
+import Toast from "@/components/Toast";
 
 export default function WritePage() {
   const router = useRouter();
@@ -14,9 +15,27 @@ export default function WritePage() {
 
   const [isFinishPopupOpen, setIsFinishPopupOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
+  const [toast, setToast] = useState({ isOpen: false, message: "" });
 
   const OPTIONS = ["대신 욕해주기", "무조건 위로해주기", "따뜻한 조언해주기", "웃겨주기"];
   const isInputActive = isFocused || content.length > 0;
+
+  const handleWriteSubmit = () => {
+    const hasContent = content.trim().length > 0;
+    const hasOption = selectedOption !== null && selectedOption !== "";
+
+    if (!hasContent) {
+      setToast({ isOpen: true, message: "내용을 작성해주세요" });
+      return;
+    }
+
+    if (!hasOption) {
+      setToast({ isOpen: true, message: "댓글옵션을 선택해주세요" });
+      return;
+    }
+
+    setIsFinishPopupOpen(true);
+  };
 
   const handleRegisterConfirm = () => {
     setIsFinishPopupOpen(false);
@@ -31,8 +50,8 @@ export default function WritePage() {
 
   return (
     <div className="flex min-h-screen justify-center bg-black font-sans">
-      <div className="relative flex h-[812px] w-full max-w-[375px] flex-col bg-black">
-        <TopbarWrite onLeftClick={() => setIsCancelPopupOpen(true)} onRightClick={() => setIsFinishPopupOpen(true)} />
+      <div className="relative flex h-[812px] w-full max-w-[375px] flex-col overflow-hidden bg-black">
+        <TopbarWrite onLeftClick={() => setIsCancelPopupOpen(true)} onRightClick={handleWriteSubmit} />
 
         <main className="flex-1 overflow-y-auto px-4 pt-4 pb-[40px]">
           <h2 className="text-body-16sb mb-4 leading-[150%] tracking-[-0.32px] text-white">내용 작성</h2>
@@ -79,16 +98,18 @@ export default function WritePage() {
             })}
           </div>
         </main>
+
+        {/* 토스트 바 마운트 영역 */}
+        <Toast message={toast.message} isOpen={toast.isOpen} onClose={() => setToast({ ...toast, isOpen: false })} />
       </div>
 
-      {/* 글 등록 완료 확인 팝업 */}
+      {/* 팝업 레이어 배치 영역 */}
       <PopupWriteFinish
         isOpen={isFinishPopupOpen}
         onClose={() => setIsFinishPopupOpen(false)}
         onConfirm={handleRegisterConfirm}
       />
 
-      {/* 글 작성 취소 확인 팝업 */}
       <PopupWriteCancel
         isOpen={isCancelPopupOpen}
         onClose={() => setIsCancelPopupOpen(false)}

@@ -8,8 +8,9 @@ interface TopbarWriteProps {
 }
 
 export default function TopbarWrite({ onLeftClick, onRightClick }: TopbarWriteProps) {
-  const { selectedOption } = useWriteStore();
-  const isCompleteActive = selectedOption !== null;
+  const { content, selectedOption } = useWriteStore();
+
+  const isCompleteActive = content.trim().length > 0 && selectedOption !== null && selectedOption !== "";
 
   return (
     <header className="flex h-[68px] w-[375px] shrink-0 items-center justify-between bg-black px-4">
@@ -29,12 +30,9 @@ export default function TopbarWrite({ onLeftClick, onRightClick }: TopbarWritePr
 
       <button
         type="button"
-        disabled={!isCompleteActive}
-        onClick={onRightClick} // 바인딩
-        className={`text-right leading-[150%] tracking-[-0.32px] transition-colors duration-200 ${
-          isCompleteActive
-            ? "text-blue-30 text-body-16b cursor-pointer"
-            : "text-body-16m cursor-not-allowed text-gray-50"
+        onClick={onRightClick}
+        className={`cursor-pointer text-right leading-[150%] tracking-[-0.32px] transition-colors duration-200 ${
+          isCompleteActive ? "text-blue-30 text-body-16b" : "text-body-16m text-gray-50"
         }`}
       >
         완료
