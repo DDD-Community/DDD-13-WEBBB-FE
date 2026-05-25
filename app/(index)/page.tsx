@@ -2,6 +2,7 @@ import AlarmDefault from "@/assets/icons/ic_alarm_default.svg";
 import Menu from "@/assets/icons/ic_menu.svg";
 
 import Filter from "./Filter";
+import WriteButton from "./WriteButton";
 
 export default function Home() {
   return (
@@ -22,6 +23,8 @@ export default function Home() {
 
         <Filter />
       </div>
+
+      <WriteButton />
     </>
   );
 }

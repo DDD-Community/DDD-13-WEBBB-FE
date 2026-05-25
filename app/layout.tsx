@@ -17,8 +17,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
-      <body className="flex h-screen justify-center bg-black font-sans">
-        <main className="relative flex min-h-full w-full max-w-2xl flex-col bg-black">{children}</main>
+      <body>
+        <div className="flex h-screen justify-center bg-black font-sans">
+          <main className="relative flex min-h-full w-full max-w-2xl flex-col bg-black">{children}</main>
+        </div>
       </body>
     </html>
   );
