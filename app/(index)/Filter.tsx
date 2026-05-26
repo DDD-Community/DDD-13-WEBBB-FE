@@ -5,19 +5,34 @@ import ArrowLeft from "@/assets/icons/ic_arrow_left.svg";
 import Check from "@/assets/icons/ic_check.svg";
 import Reset from "@/assets/icons/ic_reset.svg";
 import Portal from "@/components/Portal";
+import useFloating from "@/hooks/useFloating";
 import useScrollLock from "@/hooks/useScrollLock";
 import { useState } from "react";
+import { FloatingPortal } from "@floating-ui/react";
 
 const filterOptions = {
   job: ["전체", "기획", "디자인", "개발", "마케팅", "영업", "인사", "총무", "생산", "회계"],
   career: ["전체", "신입", "1년차", "2년차", "3년차", "4년차", "5년차", "6년차", "7년차 이상"],
 };
 
+const sortOptions = ["최신순", "인기순"];
+
 export default function Filter() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<keyof typeof filterOptions>("job");
+  const [sortOption, setSortOption] = useState(sortOptions[0]);
 
   useScrollLock(isFilterOpen);
+
+  const {
+    isOpen: isSortOpen,
+    setIsOpen: setIsSortOpen,
+    setReference,
+    setFloating,
+    floatingStyles,
+    getReferenceProps,
+    getFloatingProps,
+  } = useFloating();
 
   function handleComplete() {
     // TODO: 선택된 필터 옵션 데이터를 서버로 전송하는 로직 추가 필요
@@ -47,11 +62,50 @@ export default function Filter() {
           </button>
         </div>
 
-        <button type="button" className="flex items-center gap-1 text-gray-50">
-          <p className="text-body-14m">최신순</p>
+        <button
+          type="button"
+          className="flex items-center gap-1 text-gray-50"
+          ref={setReference}
+          {...getReferenceProps()}
+        >
+          <p className="text-body-14m">{sortOption}</p>
           <ArrowDown className="h-4 w-4 flex-none" />
         </button>
       </div>
+
+      {isSortOpen && (
+        <FloatingPortal>
+          <ul
+            ref={setFloating}
+            style={floatingStyles}
+            {...getFloatingProps()}
+            className="text-body-15m bg-gray-80 shadow-1 z-20 flex flex-col gap-5 rounded-lg p-5"
+            role="listbox"
+          >
+            {sortOptions.map((option) => {
+              const isSelected = option === sortOption;
+
+              return (
+                <li key={option}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={isSelected}
+                    className="flex w-full items-center gap-4 text-gray-50 aria-selected:text-white"
+                    onClick={() => {
+                      setSortOption(option);
+                      setIsSortOpen(false);
+                    }}
+                  >
+                    <span>{option}</span>
+                    {isSelected && <Check className="h-5 w-5 flex-none" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </FloatingPortal>
+      )}
 
       {isFilterOpen && (
         <Portal>
