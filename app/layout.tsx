@@ -18,8 +18,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
       <body>
-        <div className="flex h-screen justify-center bg-black font-sans">
-          <main className="relative flex min-h-full w-full max-w-2xl flex-col bg-black">{children}</main>
+        <div className="flex min-h-screen w-full justify-center overflow-y-auto bg-black font-sans">
+          <main className="relative flex w-full max-w-2xl flex-col bg-black">{children}</main>
         </div>
       </body>
     </html>

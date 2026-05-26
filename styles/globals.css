@@ -11,4 +11,8 @@ html {
 
 body {
   color: var(--color-white);
+
+  button {
+    cursor: pointer;
+  }
 }
