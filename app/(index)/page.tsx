@@ -3,6 +3,7 @@ import Menu from "@/assets/icons/ic_menu.svg";
 
 import Filter from "./Filter";
 import WriteButton from "./WriteButton";
+import CharacterCard from "@/components/CharacterCard";
 
 export default function Home() {
   return (
@@ -23,6 +24,14 @@ export default function Home() {
 
         <Filter />
       </div>
+
+      <ul className="flex flex-col gap-4 px-4">
+        <CharacterCard type="anxious" />
+        <CharacterCard type="helpless" />
+        <CharacterCard type="lonely" />
+        <CharacterCard type="selfHate" />
+        <CharacterCard type="annoyed" />
+      </ul>
 
       <WriteButton />
     </>
