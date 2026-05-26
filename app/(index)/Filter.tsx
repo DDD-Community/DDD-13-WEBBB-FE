@@ -4,6 +4,8 @@ import ArrowDown from "@/assets/icons/ic_arrow_down.svg";
 import ArrowLeft from "@/assets/icons/ic_arrow_left.svg";
 import Check from "@/assets/icons/ic_check.svg";
 import Reset from "@/assets/icons/ic_reset.svg";
+import Portal from "@/components/Portal";
+import useScrollLock from "@/hooks/useScrollLock";
 import { useState } from "react";
 
 const filterOptions = {
@@ -14,6 +16,8 @@ const filterOptions = {
 export default function Filter() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<keyof typeof filterOptions>("job");
+
+  useScrollLock(isFilterOpen);
 
   function handleComplete() {
     // TODO: 선택된 필터 옵션 데이터를 서버로 전송하는 로직 추가 필요
@@ -50,74 +54,78 @@ export default function Filter() {
       </div>
 
       {isFilterOpen && (
-        <div className="absolute top-0 z-20 flex h-full w-full flex-col bg-black">
-          <div className="sticky top-0 bg-black">
-            <div className="text-head-22sb flex items-center gap-2 px-4 pt-6 pb-5">
-              <button type="button" onClick={() => setIsFilterOpen(false)}>
-                <ArrowLeft className="h-6 w-6 flex-none text-white" />
-              </button>
-
-              <p>필터</p>
-            </div>
-
-            <div className="border-gray-80 text-head-18m text-gray-60 flex border-b">
-              <button
-                type="button"
-                className="aria-pressed:border-blue-20 aria-pressed:text-head-18sb aria-pressed:text-blue-20 w-full py-3 aria-pressed:border-b-2"
-                aria-pressed={selectedFilter === "job"}
-                onClick={() => setSelectedFilter("job")}
-              >
-                직군
-              </button>
-              <button
-                type="button"
-                className="aria-pressed:border-blue-20 aria-pressed:text-head-18sb aria-pressed:text-blue-20 w-full py-3 aria-pressed:border-b-2"
-                aria-pressed={selectedFilter === "career"}
-                onClick={() => setSelectedFilter("career")}
-              >
-                경력
-              </button>
-            </div>
-          </div>
-
-          <div className="grow overflow-y-auto">
-            <ul className="flex flex-col gap-5 p-6">
-              {filterOptions[selectedFilter].map((option) => {
-                const isSelected = option === "전체" ? true : false; // TODO: 선택된 옵션 상태 관리 로직 추가 필요
-
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    className="text-head-18m text-gray-60 aria-pressed:text-blue-20 aria-pressed:text-head-18b flex items-center gap-3"
-                    aria-pressed={isSelected}
-                  >
-                    <p>{option}</p>
-                    {isSelected && <Check className="text-blue-20 h-6.5 w-6.5 flex-none" />}
+        <Portal>
+          <div className="fixed inset-0 z-20 flex items-center justify-center bg-black">
+            <div className="flex h-full w-full max-w-2xl flex-col">
+              <div className="sticky top-0 bg-black">
+                <div className="text-head-22sb flex items-center gap-2 px-4 pt-6 pb-5">
+                  <button type="button" onClick={() => setIsFilterOpen(false)}>
+                    <ArrowLeft className="h-6 w-6 flex-none text-white" />
                   </button>
-                );
-              })}
-            </ul>
-          </div>
 
-          <div className="flex items-center gap-2.5 bg-black px-4 pt-4 pb-8">
-            <button
-              type="button"
-              className="border-gray-80 text-head-18m flex h-13 flex-none items-center gap-2 rounded-xl border px-4.5 text-gray-50"
-            >
-              <Reset className="h-5 w-5" />
-              <p>초기화</p>
-            </button>
+                  <p>필터</p>
+                </div>
 
-            <button
-              type="button"
-              className="bg-blue-20 text-gray-90 text-head-18sb h-13 w-full rounded-xl text-center"
-              onClick={handleComplete}
-            >
-              선택 완료
-            </button>
+                <div className="border-gray-80 text-head-18m text-gray-60 flex border-b">
+                  <button
+                    type="button"
+                    className="aria-pressed:border-blue-20 aria-pressed:text-head-18sb aria-pressed:text-blue-20 w-full py-3 aria-pressed:border-b-2"
+                    aria-pressed={selectedFilter === "job"}
+                    onClick={() => setSelectedFilter("job")}
+                  >
+                    직군
+                  </button>
+                  <button
+                    type="button"
+                    className="aria-pressed:border-blue-20 aria-pressed:text-head-18sb aria-pressed:text-blue-20 w-full py-3 aria-pressed:border-b-2"
+                    aria-pressed={selectedFilter === "career"}
+                    onClick={() => setSelectedFilter("career")}
+                  >
+                    경력
+                  </button>
+                </div>
+              </div>
+
+              <div className="grow overflow-y-auto">
+                <ul className="flex flex-col gap-5 p-6">
+                  {filterOptions[selectedFilter].map((option) => {
+                    const isSelected = option === "전체" ? true : false; // TODO: 선택된 옵션 상태 관리 로직 추가 필요
+
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        className="text-head-18m text-gray-60 aria-pressed:text-blue-20 aria-pressed:text-head-18b flex items-center gap-3"
+                        aria-pressed={isSelected}
+                      >
+                        <p>{option}</p>
+                        {isSelected && <Check className="text-blue-20 h-6.5 w-6.5 flex-none" />}
+                      </button>
+                    );
+                  })}
+                </ul>
+              </div>
+
+              <div className="sticky bottom-0 flex items-center gap-2.5 bg-black px-4 pt-4 pb-8">
+                <button
+                  type="button"
+                  className="border-gray-80 text-head-18m flex h-13 flex-none items-center gap-2 rounded-xl border px-4.5 text-gray-50"
+                >
+                  <Reset className="h-5 w-5" />
+                  <p>초기화</p>
+                </button>
+
+                <button
+                  type="button"
+                  className="bg-blue-20 text-gray-90 text-head-18sb h-13 w-full rounded-xl text-center"
+                  onClick={handleComplete}
+                >
+                  선택 완료
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
     </>
   );
