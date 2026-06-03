@@ -10,14 +10,12 @@ import Modal from "./modal";
 export default function WritePage() {
   const router = useRouter();
   const { content, setContent, selectedOption, setSelectedOption } = useWriteStore();
-  const [isFocused, setIsFocused] = useState(false);
 
   const [isFinishPopupOpen, setIsFinishPopupOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [toast, setToast] = useState({ isOpen: false, message: "" });
 
   const OPTIONS = ["대신 욕해주기", "무조건 위로해주기", "따뜻한 조언해주기", "웃겨주기"];
-  const isInputActive = isFocused || content.length > 0;
 
   const handleWriteSubmit = () => {
     const hasContent = content.trim().length > 0;
@@ -56,19 +54,13 @@ export default function WritePage() {
           <h2 className="text-body-16sb mb-4 leading-[150%] tracking-[-0.32px] text-white">내용 작성</h2>
 
           <div className="w-full">
-            <div
-              className={`bg-gray-90 flex h-[320px] w-full items-start gap-[10px] rounded-[12px] border p-[16px_17px] transition-colors duration-200 ${
-                isInputActive ? "border-blue-20" : "border-transparent"
-              }`}
-            >
+            <div className="bg-gray-90 focus-within:border-blue-20 flex h-[320px] w-full items-start gap-[10px] rounded-[12px] border border-transparent transition-colors duration-200">
               <textarea
                 className="text-body-15m placeholder:text-gray-60 h-full w-full resize-none bg-transparent leading-[150%] tracking-[-0.3px] text-white outline-none"
                 placeholder="말하기 힘든 감정을 오구오구에 털어놓아 보세요!"
                 maxLength={500}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
               />
             </div>
             <div className="text-detail-12m text-gray-60 mt-1 text-right leading-[150%] tracking-[-0.24px]">
