@@ -27,9 +27,7 @@ export default function Toast({ message, isOpen, onClose }: ToastProps) {
       <div className="flex h-[36px] w-[343px] items-center gap-2 rounded-[6px] bg-white p-[8px_12px] shadow-lg">
         <Image src="/ic_error.svg" alt="에러 아이콘" width={18} height={18} className="shrink-0" />
 
-        <span className="text-gray-90 text-detail-13m leading-[150%] font-medium tracking-[-0.26px] whitespace-nowrap">
-          {message}
-        </span>
+        <span className="text-gray-90 text-detail-13m whitespace-nowrap">{message}</span>
       </div>
     </div>
   );
