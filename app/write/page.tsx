@@ -7,6 +7,8 @@ import TopbarWrite from "@/components/TopbarWrite";
 import Toast from "@/components/Toast";
 import Modal from "./modal";
 
+export const COMMENT_OPTIONS = ["대신 욕해주기", "무조건 위로해주기", "따뜻한 조언해주기", "웃겨주기"];
+
 export default function WritePage() {
   const router = useRouter();
   const { content, setContent, selectedOption, setSelectedOption } = useWriteStore();
@@ -14,8 +16,6 @@ export default function WritePage() {
   const [isFinishPopupOpen, setIsFinishPopupOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [toast, setToast] = useState({ isOpen: false, message: "" });
-
-  const OPTIONS = ["대신 욕해주기", "무조건 위로해주기", "따뜻한 조언해주기", "웃겨주기"];
 
   const handleWriteSubmit = () => {
     const hasContent = content.trim().length > 0;
@@ -72,7 +72,7 @@ export default function WritePage() {
           <h2 className="text-body-16sb mt-[44px] mb-4 leading-[150%] tracking-[-0.32px] text-white">댓글옵션 선택</h2>
 
           <div className="grid grid-cols-2 gap-x-[10px] gap-y-3">
-            {OPTIONS.map((option) => {
+            {COMMENT_OPTIONS.map((option) => {
               const isActive = selectedOption === option;
               return (
                 <button
