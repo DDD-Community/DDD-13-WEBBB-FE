@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useWriteStore } from "@/store/useWriteStore";
 import TopbarWrite from "@/components/TopbarWrite";
-import PopupWriteFinish from "@/components/PopupWriteFinish";
-import PopupWriteCancel from "@/components/PopupWriteCancel";
 import Toast from "@/components/Toast";
+import Modal from "./modal";
 
 export default function WritePage() {
   const router = useRouter();
@@ -99,21 +98,30 @@ export default function WritePage() {
           </div>
         </main>
 
-        {/* 토스트 바 마운트 영역 */}
         <Toast message={toast.message} isOpen={toast.isOpen} onClose={() => setToast({ ...toast, isOpen: false })} />
       </div>
 
-      {/* 팝업 레이어 배치 영역 */}
-      <PopupWriteFinish
+      <Modal
         isOpen={isFinishPopupOpen}
         onClose={() => setIsFinishPopupOpen(false)}
         onConfirm={handleRegisterConfirm}
+        title="글 작성을 완료할까요?"
+        imageSrc="/popup_write_finish.svg"
+        cancelText="계속 쓰기"
+        confirmText="등록하기"
+        confirmVariant="blue"
       />
 
-      <PopupWriteCancel
+      <Modal
         isOpen={isCancelPopupOpen}
         onClose={() => setIsCancelPopupOpen(false)}
         onConfirm={handleCancelConfirm}
+        title="글 작성을 취소하시겠어요?"
+        subTitle="지금 나가면 작성 중인 내용이 저장되지 않아요."
+        imageSrc="/popup_write_cancel.svg"
+        cancelText="계속 쓰기"
+        confirmText="취소하기"
+        confirmVariant="red"
       />
     </div>
   );
