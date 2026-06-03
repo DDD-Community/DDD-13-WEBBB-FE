@@ -11,7 +11,7 @@ interface TopbarWriteProps {
 export default function TopbarWrite({ onLeftClick, onRightClick }: TopbarWriteProps) {
   const { content, selectedOption } = useWriteStore();
 
-  const isCompleteActive = content.trim().length > 0 && selectedOption !== null && selectedOption !== "";
+  const isCompleteActive = content.trim().length > 0 && selectedOption !== "";
 
   const LeftButton = (
     <button type="button" aria-label="닫기" className="cursor-pointer text-white" onClick={onLeftClick}>

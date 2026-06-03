@@ -19,7 +19,7 @@ export default function WritePage() {
 
   const handleWriteSubmit = () => {
     const hasContent = content.trim().length > 0;
-    const hasOption = selectedOption !== null && selectedOption !== "";
+    const hasOption = selectedOption !== "";
 
     if (!hasContent) {
       setToast({ isOpen: true, message: "내용을 작성해주세요" });
