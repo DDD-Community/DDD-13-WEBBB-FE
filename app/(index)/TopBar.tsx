@@ -4,6 +4,7 @@ import AlarmDefault from "@/assets/icons/ic_alarm_default.svg";
 import Menu from "@/assets/icons/ic_menu.svg";
 import Close from "@/assets/icons/ic_close.svg";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function TopBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,9 +36,9 @@ export default function TopBar() {
         <>
           <div className="fixed inset-0 z-20" onClick={handleMenuClick} />
           <div className="text-body-16m text-gray-10 absolute top-17 z-20 flex w-full flex-col gap-6 bg-black px-6 py-5">
-            <a href="#">홈</a>
-            <a href="#">마이페이지</a>
-            <a href="#">설정</a>
+            <Link href="#">홈</Link>
+            <Link href="#">마이페이지</Link>
+            <Link href="#">설정</Link>
           </div>
         </>
       )}

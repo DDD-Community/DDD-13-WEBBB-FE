@@ -146,15 +146,16 @@ export default function Filter() {
                     const isSelected = option === "전체" ? true : false; // TODO: 선택된 옵션 상태 관리 로직 추가 필요
 
                     return (
-                      <button
-                        key={option}
-                        type="button"
-                        className="text-head-18m text-gray-60 aria-pressed:text-blue-20 aria-pressed:text-head-18b flex items-center gap-3"
-                        aria-pressed={isSelected}
-                      >
-                        <p>{option}</p>
-                        {isSelected && <Check className="text-blue-20 h-6.5 w-6.5 flex-none" />}
-                      </button>
+                      <li key={option}>
+                        <button
+                          type="button"
+                          className="text-head-18m text-gray-60 aria-pressed:text-blue-20 aria-pressed:text-head-18b flex items-center gap-3"
+                          aria-pressed={isSelected}
+                        >
+                          <p>{option}</p>
+                          {isSelected && <Check className="text-blue-20 h-6.5 w-6.5 flex-none" />}
+                        </button>
+                      </li>
                     );
                   })}
                 </ul>
