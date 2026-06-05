@@ -6,7 +6,7 @@ import Close from "@/assets/icons/ic_close.svg";
 import { useState } from "react";
 import Link from "next/link";
 
-export default function TopBar() {
+export default function MainTopbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleMenuClick = () => {
