@@ -6,7 +6,7 @@ import X from "@/assets/icons/ic_x.svg";
 import { useState } from "react";
 import Link from "next/link";
 
-export default function MainTopbar() {
+export default function MainTopBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleMenuClick = () => {

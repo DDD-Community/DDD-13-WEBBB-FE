@@ -1,11 +1,11 @@
-import MainTopbar from "@/components/MainTopbar";
+import MainTopBar from "@/components/MainTopBar";
 import Character from "./character.svg";
 import Link from "next/link";
 
 export default function Landing() {
   return (
     <>
-      <MainTopbar />
+      <MainTopBar />
 
       <p className="text-head-22sb mx-auto mt-29 text-center text-white">
         마음 속 몬스터를 꺼내고

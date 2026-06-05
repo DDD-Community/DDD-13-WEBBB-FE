@@ -1,14 +1,14 @@
 "use client";
 
 import { useWriteStore } from "@/store/useWriteStore";
-import Topbar from "@/components/Topbar";
+import TopBar from "@/components/TopBar";
 
-interface TopbarWriteProps {
+interface TopBarWriteProps {
   onLeftClick?: () => void;
   onRightClick?: () => void;
 }
 
-export default function TopbarWrite({ onLeftClick, onRightClick }: TopbarWriteProps) {
+export default function TopBarWrite({ onLeftClick, onRightClick }: TopBarWriteProps) {
   const { content, selectedOption } = useWriteStore();
 
   const isCompleteActive = content.trim().length > 0 && selectedOption !== "";
@@ -39,5 +39,5 @@ export default function TopbarWrite({ onLeftClick, onRightClick }: TopbarWritePr
     </button>
   );
 
-  return <Topbar title="글 쓰기" leftContent={LeftButton} rightContent={RightButton} />;
+  return <TopBar title="글 쓰기" leftContent={LeftButton} rightContent={RightButton} />;
 }

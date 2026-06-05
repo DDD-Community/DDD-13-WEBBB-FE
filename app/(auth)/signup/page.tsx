@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import PasswordRule from "./PasswordRule";
+import TopBar from "@/components/TopBar";
 
 export default function Signup() {
   const router = useRouter();
@@ -73,11 +74,13 @@ export default function Signup() {
 
   return (
     <>
-      <div className="px-4 py-5">
-        <button type="button" onClick={() => router.back()}>
-          <X className="h-6 w-6" />
-        </button>
-      </div>
+      <TopBar
+        leftContent={
+          <button type="button" onClick={() => router.back()}>
+            <X className="h-6 w-6" />
+          </button>
+        }
+      />
 
       <form className="mt-8.5 flex grow flex-col gap-15 px-4" onSubmit={handleSubmit(onSubmit)}>
         <FormField label="이메일 주소" htmlFor="signup-email" errorMessage={errors.email?.message}>

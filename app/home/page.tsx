@@ -1,5 +1,5 @@
 import Filter from "./Filter";
-import MainTopbar from "@/components/MainTopbar";
+import MainTopBar from "@/components/MainTopBar";
 import WriteButton from "./WriteButton";
 import CharacterCard from "@/components/CharacterCard";
 
@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <>
       <div>
-        <MainTopbar />
+        <MainTopBar />
         <Filter />
       </div>
 

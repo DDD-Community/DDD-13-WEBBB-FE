@@ -4,6 +4,7 @@ import X from "@/assets/icons/ic_x.svg";
 import XCircle from "@/assets/icons/ic_x_circle.svg";
 import FormField from "@/components/FormField";
 import TextInput from "@/components/TextInput";
+import TopBar from "@/components/TopBar";
 import { loginSchema, type LoginInput } from "@/schemas/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -37,11 +38,13 @@ export default function EmailLogin() {
 
   return (
     <>
-      <div className="px-4 py-5">
-        <button type="button" onClick={() => router.back()}>
-          <X className="h-6 w-6" />
-        </button>
-      </div>
+      <TopBar
+        leftContent={
+          <button type="button" onClick={() => router.back()}>
+            <X className="h-6 w-6" />
+          </button>
+        }
+      />
 
       <form className="mt-8.5 flex grow flex-col gap-21.5 px-4" onSubmit={handleSubmit(onSubmit)}>
         <FormField label="이메일 주소" htmlFor="email" errorMessage={errors.email?.message}>
