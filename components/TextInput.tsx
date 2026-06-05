@@ -14,7 +14,7 @@ const TextInput = forwardRef<HTMLInputElement, TextInputProps>(function TextInpu
   return (
     <div
       data-invalid={hasError || undefined}
-      className="data-invalid:border-red-20 bg-gray-90 flex items-center gap-3 rounded-xl border border-transparent pr-3"
+      className="data-invalid:border-red-20 bg-gray-90 focus-within:border-blue-20 flex items-center gap-3 rounded-xl border border-transparent pr-3"
     >
       <input
         ref={ref}

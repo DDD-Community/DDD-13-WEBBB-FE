@@ -2,7 +2,7 @@
 
 import AlarmDefault from "@/assets/icons/ic_alarm_default.svg";
 import Menu from "@/assets/icons/ic_menu.svg";
-import Close from "@/assets/icons/ic_close.svg";
+import X from "@/assets/icons/ic_x.svg";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -24,7 +24,7 @@ export default function MainTopbar() {
           </button>
           <button type="button" onClick={handleMenuClick}>
             {isMenuOpen ? (
-              <Close className="h-6 w-6 flex-none text-white" />
+              <X className="h-6 w-6 flex-none text-white" />
             ) : (
               <Menu className="h-6 w-6 flex-none text-gray-50" />
             )}

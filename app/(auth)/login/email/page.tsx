@@ -1,6 +1,6 @@
 "use client";
 
-import Close from "@/assets/icons/ic_close.svg";
+import X from "@/assets/icons/ic_x.svg";
 import XCircle from "@/assets/icons/ic_x_circle.svg";
 import FormField from "@/components/FormField";
 import TextInput from "@/components/TextInput";
@@ -39,7 +39,7 @@ export default function EmailLogin() {
     <>
       <div className="px-4 py-5">
         <button type="button" onClick={() => router.back()}>
-          <Close className="h-6 w-6" />
+          <X className="h-6 w-6" />
         </button>
       </div>
 
