@@ -2,6 +2,7 @@
 
 import ArrowLeft from "@/assets/icons/ic_arrow_left.svg";
 import CharacterLogin from "./character_login.svg";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import LoginButton from "./LoginButton";
 import TopBar from "@/components/TopBar";
@@ -20,7 +21,7 @@ export default function Login() {
       />
 
       <div className="px-4">
-        <p className="text-head-13m mt-10 py-1.5 text-center">서비스 로고</p>
+        <Image src="/logo.svg" alt="서비스 로고" width={98} height={28} className="mx-auto" priority />
 
         <p className="text-head-22sb mt-8 text-center">
           로그인하고
