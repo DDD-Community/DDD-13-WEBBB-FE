@@ -50,5 +50,12 @@ export const signupSchema = z.object({
   password: passwordSchema,
 });
 
+export const onboardingSchema = z.object({
+  nickname: nicknameSchema,
+  job: jobSchema,
+  career: careerSchema,
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
+export type OnboardingInput = z.infer<typeof onboardingSchema>;
