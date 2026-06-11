@@ -1,28 +1,34 @@
 "use client";
 
 import { type ReactNode } from "react";
+import { useFormContext } from "react-hook-form";
+import { FormFieldContext } from "./FormFieldContext";
 
 type FormFieldProps = {
   label: string;
-  htmlFor: string;
-  errorMessage?: string;
+  name?: string;
+  htmlFor?: string; // name과 DOM id가 달라야 할 때만 지정. 생략 시 name을 id로 사용
   children: ReactNode;
 };
 
-export default function FormField({ label, htmlFor, errorMessage, children }: FormFieldProps) {
-  const errorId = `${htmlFor}-error`;
+export default function FormField({ label, name, htmlFor, children }: FormFieldProps) {
+  const { getFieldState, formState } = useFormContext();
+
+  const error = name ? getFieldState(name, formState).error : undefined;
+  const inputId = htmlFor ?? name;
+  const errorId = `${inputId}-error`;
 
   return (
     <div>
-      <label htmlFor={htmlFor} className="text-body-16sb mb-3 block">
+      <label htmlFor={inputId} className="text-body-16sb mb-3 block">
         {label}
       </label>
 
-      {children}
+      <FormFieldContext.Provider value={{ inputId, errorId, invalid: !!error }}>{children}</FormFieldContext.Provider>
 
-      {errorMessage && (
+      {error?.message && (
         <p id={errorId} role="alert" className="text-red-20 text-detail-12m mt-3">
-          {errorMessage}
+          {error.message}
         </p>
       )}
     </div>
