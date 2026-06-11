@@ -1,8 +1,13 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import type { SupportType } from "./mockData";
 
-export default function CommentInput({ placeholder }: { placeholder: string }) {
+interface CommentInputProps {
+  placeholderType: SupportType;
+}
+
+export default function CommentInput({ placeholderType }: CommentInputProps) {
   const [commentText, setCommentText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -20,7 +25,7 @@ export default function CommentInput({ placeholder }: { placeholder: string }) {
         ref={textareaRef}
         value={commentText}
         onChange={handleTextareaChange}
-        placeholder={`${placeholder}...`}
+        placeholder={`${placeholderType}...`}
         rows={1}
         className="text-body-15m max-h-[115px] w-full resize-none overflow-y-auto bg-transparent text-white outline-none placeholder:text-gray-50"
       />
