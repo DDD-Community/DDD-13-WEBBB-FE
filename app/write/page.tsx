@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useWriteStore } from "@/store/useWriteStore";
-import TopbarWrite from "@/components/TopbarWrite";
+import TopBarWrite from "@/components/TopBarWrite";
 import Toast from "@/components/Toast";
 import Modal from "./modal";
 
@@ -48,7 +48,7 @@ export default function WritePage() {
   return (
     <div className="flex min-h-screen justify-center bg-black font-sans">
       <div className="relative flex h-[812px] w-full max-w-[375px] flex-col overflow-hidden bg-black">
-        <TopbarWrite onLeftClick={() => setIsCancelPopupOpen(true)} onRightClick={handleWriteSubmit} />
+        <TopBarWrite onLeftClick={() => setIsCancelPopupOpen(true)} onRightClick={handleWriteSubmit} />
 
         <main className="flex-1 overflow-y-auto px-4 pt-4 pb-[40px]">
           <h2 className="text-body-16sb mb-4 leading-[150%] tracking-[-0.32px] text-white">내용 작성</h2>
