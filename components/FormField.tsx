@@ -5,13 +5,14 @@ import { useFormContext } from "react-hook-form";
 import { FormFieldContext } from "./FormFieldContext";
 
 type FormFieldProps = {
-  label: string;
+  label?: string;
   name?: string;
   htmlFor?: string; // name과 DOM id가 달라야 할 때만 지정. 생략 시 name을 id로 사용
+  hideLabel?: boolean;
   children: ReactNode;
 };
 
-export default function FormField({ label, name, htmlFor, children }: FormFieldProps) {
+export default function FormField({ label, name, htmlFor, hideLabel, children }: FormFieldProps) {
   const { getFieldState, formState } = useFormContext();
 
   const error = name ? getFieldState(name, formState).error : undefined;
@@ -20,9 +21,11 @@ export default function FormField({ label, name, htmlFor, children }: FormFieldP
 
   return (
     <div>
-      <label htmlFor={inputId} className="text-body-16sb mb-3 block">
-        {label}
-      </label>
+      {!hideLabel && (
+        <label htmlFor={inputId} className="text-body-16sb mb-3 block">
+          {label}
+        </label>
+      )}
 
       <FormFieldContext.Provider value={{ inputId, errorId, invalid: !!error }}>{children}</FormFieldContext.Provider>
 
