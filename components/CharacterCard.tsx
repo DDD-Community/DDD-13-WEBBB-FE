@@ -80,7 +80,7 @@ export default function CharacterCard({ profile = true, type }: CharacterCardPro
   const character = CHARACTER_THEME[type];
 
   return (
-    <li>
+    <div className="list-none">
       <Link prefetch={false} href="/#" className={characterCardStyle({ character: type })}>
         {profile && (
           <>
@@ -157,6 +157,6 @@ export default function CharacterCard({ profile = true, type }: CharacterCardPro
           </div>
         )}
       </Link>
-    </li>
+    </div>
   );
 }
