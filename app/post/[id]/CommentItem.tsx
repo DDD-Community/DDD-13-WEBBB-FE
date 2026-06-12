@@ -98,7 +98,8 @@ export default function CommentItem({ comment }: { comment: Comment }) {
           ) : (
             <HeartDefault className="text-gray-60 h-4 w-4 flex-none" />
           )}
-          <span className="text-detail-12m">{likeCount}</span>
+
+          {likeCount > 0 && <span className="text-detail-12m">{likeCount}</span>}
         </button>
       </div>
 
