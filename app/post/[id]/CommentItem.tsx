@@ -6,13 +6,14 @@ import HeartDefault from "@/assets/icons/ic_heart_default.svg";
 import HeartActive from "@/assets/icons/ic_heart_active.svg";
 import MoreIcon from "@/assets/icons/ic_more_sm_white.svg";
 import DeleteIcon from "@/assets/icons/ic_delete.svg";
+import Modal from "@/app/write/modal";
 
 export default function CommentItem({ comment }: { comment: Comment }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(comment.likeCount);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // TODO: 실제 유저 연동 시 현재 로그인한 유저 ID와 비교하도록 수정 필요
   const isMine = comment.author.nickname === "이직귀찮";
 
   const handleLikeClick = () => {
@@ -25,10 +26,13 @@ export default function CommentItem({ comment }: { comment: Comment }) {
     }
   };
 
-  const handleDeleteClick = () => {
-    // TODO: 삭제 API 연동 및 부모 컴포넌트 데이터 갱신 로직 추가 필요
-    alert("댓글 삭제가 요청되었습니다.");
+  const handleDeleteMenuClick = () => {
     setIsMenuOpen(false);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -61,11 +65,9 @@ export default function CommentItem({ comment }: { comment: Comment }) {
             {isMenuOpen && (
               <button
                 type="button"
-                onClick={handleDeleteClick}
+                onClick={handleDeleteMenuClick}
                 className="bg-gray-80 absolute right-0 bottom-[calc(100%+6px)] z-10 flex w-[169px] items-center justify-between rounded-[8px] px-4 py-3 text-left transition-all"
-                style={{
-                  boxShadow: "0 4px 15px 0 rgba(0, 0, 0, 0.35)",
-                }}
+                style={{ boxShadow: "0 4px 15px 0 rgba(0, 0, 0, 0.35)" }}
               >
                 <span
                   className="text-[15px] leading-[150%] font-medium tracking-[-0.3px] text-white"
@@ -73,7 +75,6 @@ export default function CommentItem({ comment }: { comment: Comment }) {
                 >
                   삭제
                 </span>
-
                 <DeleteIcon className="h-5 w-5 flex-none shrink-0" />
               </button>
             )}
@@ -87,7 +88,6 @@ export default function CommentItem({ comment }: { comment: Comment }) {
 
       <div className="mt-3 flex items-center">
         <span className="text-detail-12m text-gray-60">{comment.createdAt}</span>
-
         <button
           type="button"
           onClick={handleLikeClick}
@@ -101,6 +101,16 @@ export default function CommentItem({ comment }: { comment: Comment }) {
           <span className="text-detail-12m">{likeCount}</span>
         </button>
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="댓글을 삭제하시겠어요?"
+        confirmText="확인"
+        cancelText="취소"
+        confirmVariant="blue"
+      />
     </li>
   );
 }
