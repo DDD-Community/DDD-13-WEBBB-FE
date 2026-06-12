@@ -28,8 +28,16 @@ export default function CommentInput({ placeholderType }: CommentInputProps) {
     }
   };
 
+  const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    if (e.currentTarget.contains(e.relatedTarget as Node)) {
+      return;
+    }
+    handleCancel();
+  };
+
   return (
     <div
+      onBlur={handleBlur}
       className={`bg-gray-90 fixed bottom-0 left-1/2 flex w-full max-w-2xl -translate-x-1/2 px-4 pb-[24px] ${
         isFocused ? "flex-col gap-2.5 pt-3" : "h-[72px] flex-row items-start justify-between pt-[16px]"
       }`}
