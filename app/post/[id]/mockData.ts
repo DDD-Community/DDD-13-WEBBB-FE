@@ -29,6 +29,7 @@ export interface Comment {
   isLiked: boolean;
 }
 
+// ⭕ 이 부분이 안전하게 살아있어야 page.tsx에서 에러가 안 납니다!
 export const MOCK_POST: Post = {
   id: 123,
   author: { nickname: "오오", job: "개발", experience: "1년차" },
@@ -40,6 +41,11 @@ export const MOCK_POST: Post = {
   supportType: "무조건 위로해주기",
 };
 
+// ⭕ 댓글 없는 화면을 테스트하기 위해 빈 배열로 설정해 둡니다.
+export const MOCK_COMMENTS: Comment[] = [];
+
+/* 💡 나중에 다시 댓글이 있는 화면을 보고 싶을 때, 
+      위의 빈 배열을 주석 처리하고 아래 주석을 풀어서 사용하세요!
 export const MOCK_COMMENTS: Comment[] = [
   {
     id: 1,
@@ -58,3 +64,4 @@ export const MOCK_COMMENTS: Comment[] = [
     isLiked: false,
   },
 ];
+*/

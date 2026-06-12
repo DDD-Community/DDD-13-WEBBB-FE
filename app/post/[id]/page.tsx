@@ -1,6 +1,7 @@
 "use client";
 
 import ArrowLeft from "@/assets/icons/ic_arrow_left_lg.svg";
+import ImgPostNoComment from "@/assets/icons/img_post_no_comment.svg";
 
 import CharacterCard from "@/components/CharacterCard";
 import LikeButton from "@/components/LikeButton";
@@ -16,7 +17,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="min-h-screen bg-black pb-[120px]">
-      <header className="border-gray-90 flex h-[68px] w-full items-center border-b bg-black px-4 py-[22px]">
+      <header className="border-gray-90 sticky top-0 z-50 flex h-[68px] w-full items-center border-b bg-black px-4 py-[22px]">
         <button type="button" aria-label="뒤로가기">
           <ArrowLeft className="text-gray-30 h-6 w-6" />
         </button>
@@ -53,11 +54,23 @@ export default function PostDetailPage() {
           <SpeechBubble text={post.supportType} />
         </div>
 
-        <ul className="mt-[18px] flex list-none flex-col gap-6 px-4">
-          {comments.map((comment) => (
-            <CommentItem key={comment.id} comment={comment} />
-          ))}
-        </ul>
+        {comments.length === 0 ? (
+          <div className="mt-[60px] flex flex-col items-center justify-center">
+            <ImgPostNoComment className="h-[98px] w-[58px] object-contain" />
+            <p
+              className="text-gray-70 mt-3 text-center text-[14px] leading-[150%] font-medium tracking-[-0.28px] whitespace-pre-line"
+              style={{ fontFamily: "Pretendard" }}
+            >
+              아직 작성된 댓글이 없어요.{"\n"}댓글을 써 몬스터를 처치해주세요!
+            </p>
+          </div>
+        ) : (
+          <ul className="mt-[18px] flex list-none flex-col gap-6 px-4">
+            {comments.map((comment) => (
+              <CommentItem key={comment.id} comment={comment} />
+            ))}
+          </ul>
+        )}
       </main>
 
       <CommentInput placeholderType={post.supportType} />
