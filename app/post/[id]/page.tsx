@@ -53,7 +53,7 @@ export default function PostDetailPage() {
           <SpeechBubble text={post.supportType} />
         </div>
 
-        <ul className="mt-[18px] flex flex-col gap-6 px-4">
+        <ul className="mt-[18px] flex list-none flex-col gap-6 px-4">
           {comments.map((comment) => (
             <CommentItem key={comment.id} comment={comment} />
           ))}

@@ -47,6 +47,14 @@ export const MOCK_COMMENTS: Comment[] = [
     content: "조금만 더 버텨보자..!! 잠깐 쉬어도 되니 파이팅",
     createdAt: "1분 전",
     likeCount: 1,
+    isLiked: true,
+  },
+  {
+    id: 2,
+    author: { nickname: "포포", job: "디자인", experience: "3년차" },
+    content: "저도 똑같아요 ㅠㅠ 이번 주말은 그냥 푹 쉬는 걸로 해요 우리!",
+    createdAt: "5분 전",
+    likeCount: 0,
     isLiked: false,
   },
 ];
