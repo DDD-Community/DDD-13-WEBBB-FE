@@ -20,7 +20,7 @@ export default function CommentInput({ placeholderType }: CommentInputProps) {
   };
 
   return (
-    <div className="bg-gray-90 fixed bottom-0 left-0 flex w-full flex-col gap-2.5 px-4 pt-3 pb-[24px]">
+    <div className="bg-gray-90 fixed bottom-0 left-1/2 flex w-full max-w-2xl -translate-x-1/2 flex-col gap-2.5 px-4 pt-3 pb-[24px]">
       <textarea
         ref={textareaRef}
         value={commentText}

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useWriteStore } from "@/store/useWriteStore";
-import TopBarWrite from "@/components/TopBarWrite";
+import TopBarWrite from "@/components/TopbarWrite";
 import Toast from "@/components/Toast";
 import Modal from "./modal";
 
