@@ -8,6 +8,7 @@ import LikeButton from "@/components/LikeButton";
 import SpeechBubble from "./SpeechBubble";
 import CommentItem from "./CommentItem";
 import CommentInput from "./CommentInput";
+import TopBar from "@/components/TopBar";
 
 import { MOCK_POST, MOCK_COMMENTS } from "./mockData";
 
@@ -17,11 +18,14 @@ export default function PostDetailPage() {
 
   return (
     <div className="min-h-screen bg-black pb-[120px]">
-      <header className="border-gray-90 sticky top-0 z-50 flex h-[68px] w-full items-center border-b bg-black px-4 py-[22px]">
-        <button type="button" aria-label="뒤로가기">
-          <ArrowLeft className="text-gray-30 h-6 w-6" />
-        </button>
-      </header>
+      <TopBar
+        className="border-gray-90 sticky top-0 z-50 border-b"
+        leftContent={
+          <button type="button" aria-label="뒤로가기">
+            <ArrowLeft className="text-gray-30 h-6 w-6" />
+          </button>
+        }
+      />
 
       <main>
         <div className="mt-5 ml-4 flex items-center">
