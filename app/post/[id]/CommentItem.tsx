@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Comment } from "./mockData";
 import MoreIcon from "@/assets/icons/ic_more_sm_white.svg";
 import DeleteIcon from "@/assets/icons/ic_delete.svg";
-import Modal from "@/app/write/modal";
+import Modal from "@/components/modal";
 import Heart from "@/assets/icons/ic_heart.svg";
 
 export default function CommentItem({ comment }: { comment: Comment }) {
