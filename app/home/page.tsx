@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import Filter from "./Filter";
 import MainTopBar from "@/components/MainTopBar";
 import WriteButton from "./WriteButton";
 import CharacterCard from "@/components/CharacterCard";
+
+export const metadata: Metadata = {
+  title: "홈",
+};
 
 export default function Home() {
   return (
