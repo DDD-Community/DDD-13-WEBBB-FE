@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import HeartDefault from "@/assets/icons/ic_heart_default.svg";
-import HeartActive from "@/assets/icons/ic_heart_active.svg";
+import Heart from "@/assets/icons/ic_heart.svg";
 
 type LikeButtonProps = {
   initialLikeCount: number;
@@ -29,14 +28,11 @@ export default function LikeButton({ initialLikeCount, initialIsLiked = false }:
     <button
       type="button"
       onClick={handleLikeClick}
-      className="bg-gray-90 text-gray-30 flex items-center justify-center gap-0.5 rounded-[4px] px-2 py-1.25 text-[13px] leading-[150%] font-medium tracking-[-0.26px] transition-colors"
-      style={{ fontFamily: "Pretendard" }}
+      className="bg-gray-90 text-gray-30 text-detail-13m flex items-center justify-center gap-0.5 rounded-[4px] px-2 py-1.25 transition-colors"
     >
-      {isLiked ? (
-        <HeartActive className="text-red-20 h-4 w-4 flex-none" />
-      ) : (
-        <HeartDefault className="text-gray-30 h-4 w-4 flex-none" />
-      )}
+      <Heart
+        className={`h-4 w-4 flex-none transition-colors ${isLiked ? "text-red-20 fill-red-20" : "text-gray-30"}`}
+      />
 
       <span>공감하기</span>
       <span>·</span>

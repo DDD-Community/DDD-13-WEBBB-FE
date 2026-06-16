@@ -59,8 +59,7 @@ export default function CommentInput({ placeholderType }: CommentInputProps) {
           <button
             type="button"
             onClick={handleCancel}
-            className="text-gray-40 flex h-[32px] w-[52px] shrink-0 items-center justify-center rounded-[4px] text-center text-[14px] leading-[150%] font-medium tracking-[-0.28px]"
-            style={{ fontFamily: "Pretendard" }}
+            className="text-gray-40 text-body-14m flex h-[32px] w-[52px] shrink-0 items-center justify-center rounded-[4px] text-center"
           >
             취소
           </button>
@@ -72,12 +71,7 @@ export default function CommentInput({ placeholderType }: CommentInputProps) {
             commentText.trim().length > 0 ? "bg-blue-30 text-white" : "bg-gray-80 text-gray-40"
           }`}
         >
-          <span
-            className="text-[14px] leading-[150%] font-medium tracking-[-0.28px]"
-            style={{ fontFamily: "Pretendard" }}
-          >
-            댓글
-          </span>
+          <span className="text-body-14m">댓글</span>
         </button>
       </div>
     </div>

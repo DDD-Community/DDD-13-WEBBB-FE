@@ -61,10 +61,7 @@ export default function PostDetailPage() {
         {comments.length === 0 ? (
           <div className="mt-[60px] flex flex-col items-center justify-center">
             <ImgPostNoComment className="h-[98px] w-[58px] object-contain" />
-            <p
-              className="text-gray-70 mt-3 text-center text-[14px] leading-[150%] font-medium tracking-[-0.28px] whitespace-pre-line"
-              style={{ fontFamily: "Pretendard" }}
-            >
+            <p className="text-gray-70 text-body-14m mt-3 text-center whitespace-pre-line">
               아직 작성된 댓글이 없어요.{"\n"}댓글을 써 몬스터를 처치해주세요!
             </p>
           </div>

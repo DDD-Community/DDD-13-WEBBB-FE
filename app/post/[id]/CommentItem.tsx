@@ -68,12 +68,7 @@ export default function CommentItem({ comment }: { comment: Comment }) {
                 className="bg-gray-80 absolute right-0 bottom-[calc(100%+6px)] z-10 flex w-[169px] items-center justify-between rounded-[8px] px-4 py-3 text-left transition-all"
                 style={{ boxShadow: "0 4px 15px 0 rgba(0, 0, 0, 0.35)" }}
               >
-                <span
-                  className="text-[15px] leading-[150%] font-medium tracking-[-0.3px] text-white"
-                  style={{ fontFamily: "Pretendard" }}
-                >
-                  삭제
-                </span>
+                <span className="text-body-15m text-white">삭제</span>
                 <DeleteIcon className="h-5 w-5 flex-none shrink-0" />
               </button>
             )}
@@ -106,7 +101,7 @@ export default function CommentItem({ comment }: { comment: Comment }) {
         onConfirm={handleConfirmDelete}
         title="댓글을 삭제하시겠어요?"
         confirmText="확인"
-        cancelText="취소"
+        cancelText="취se"
         confirmVariant="blue"
       />
     </li>
