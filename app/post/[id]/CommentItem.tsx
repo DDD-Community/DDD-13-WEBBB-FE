@@ -7,13 +7,25 @@ import DeleteIcon from "@/assets/icons/ic_delete.svg";
 import Modal from "@/components/modal";
 import Heart from "@/assets/icons/ic_heart.svg";
 
+import useFloating from "@/hooks/useFloating";
+import { FloatingPortal } from "@floating-ui/react";
+
 export default function CommentItem({ comment }: { comment: Comment }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(comment.likeCount);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isMine = comment.author.nickname === "이직귀찮";
+
+  const {
+    isOpen: isMenuOpen,
+    setIsOpen: setIsMenuOpen,
+    setReference,
+    setFloating,
+    floatingStyles,
+    getReferenceProps,
+    getFloatingProps,
+  } = useFloating({ placement: "bottom-end", gap: 6 });
 
   const handleLikeClick = () => {
     if (isLiked) {
@@ -55,26 +67,30 @@ export default function CommentItem({ comment }: { comment: Comment }) {
           <div className="relative ml-2 shrink-0">
             <button
               type="button"
-              onClick={() => setIsMenuOpen((prev) => !prev)}
+              ref={setReference}
+              {...getReferenceProps()}
               className="flex h-6 w-6 items-center justify-center p-0.5"
             >
               <MoreIcon className="h-4 w-4 text-white" />
             </button>
 
             {isMenuOpen && (
-              <button
-                type="button"
-                onClick={handleDeleteMenuClick}
-                className="bg-gray-80 absolute right-0 bottom-[calc(100%+6px)] z-10 flex w-[169px] items-center justify-between rounded-[8px] px-4 py-3 text-left transition-all"
-                style={{ boxShadow: "0 4px 15px 0 rgba(0, 0, 0, 0.35)" }}
-              >
-                <span className="text-body-15m text-white">삭제</span>
-                <DeleteIcon className="h-5 w-5 flex-none shrink-0" />
-              </button>
-            )}
-
-            {isMenuOpen && (
-              <div className="fixed inset-0 z-0 cursor-default bg-transparent" onClick={() => setIsMenuOpen(false)} />
+              <FloatingPortal>
+                <button
+                  type="button"
+                  ref={setFloating}
+                  {...getFloatingProps()}
+                  onClick={handleDeleteMenuClick}
+                  className="bg-gray-80 z-50 flex w-[169px] items-center justify-between rounded-[8px] px-4 py-3 text-left transition-all"
+                  style={{
+                    ...floatingStyles,
+                    boxShadow: "0 4px 15px 0 rgba(0, 0, 0, 0.35)",
+                  }}
+                >
+                  <span className="text-body-15m text-white">삭제</span>
+                  <DeleteIcon className="h-5 w-5 flex-none shrink-0" />
+                </button>
+              </FloatingPortal>
             )}
           </div>
         )}
@@ -101,7 +117,7 @@ export default function CommentItem({ comment }: { comment: Comment }) {
         onConfirm={handleConfirmDelete}
         title="댓글을 삭제하시겠어요?"
         confirmText="확인"
-        cancelText="취se"
+        cancelText="취소"
         confirmVariant="blue"
       />
     </li>
