@@ -4,6 +4,7 @@ import AlarmDefault from "@/assets/icons/ic_alarm_default.svg";
 import Menu from "@/assets/icons/ic_menu.svg";
 import X from "@/assets/icons/ic_x.svg";
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 
 export default function MainTopBar() {
@@ -16,7 +17,7 @@ export default function MainTopBar() {
   return (
     <>
       <div className="sticky top-0 z-10 flex h-17 items-center justify-between bg-black px-4">
-        <p className="text-head-22sb">서비스 로고</p>
+        <Image src="/logo.svg" alt="서비스 로고" width={98} height={28} priority />
 
         <div className="align-center flex gap-4">
           <button type="button">
