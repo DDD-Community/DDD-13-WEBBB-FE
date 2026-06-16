@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import type { Comment } from "./mockData";
-import HeartDefault from "@/assets/icons/ic_heart_default.svg";
-import HeartActive from "@/assets/icons/ic_heart_active.svg";
 import MoreIcon from "@/assets/icons/ic_more_sm_white.svg";
 import DeleteIcon from "@/assets/icons/ic_delete.svg";
 import Modal from "@/app/write/modal";
+import Heart from "@/assets/icons/ic_heart.svg";
 
 export default function CommentItem({ comment }: { comment: Comment }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -93,11 +92,9 @@ export default function CommentItem({ comment }: { comment: Comment }) {
           onClick={handleLikeClick}
           className="text-gray-60 ml-4 flex items-center gap-0.5 transition-colors"
         >
-          {isLiked ? (
-            <HeartActive className="text-red-20 h-4 w-4 flex-none" />
-          ) : (
-            <HeartDefault className="text-gray-60 h-4 w-4 flex-none" />
-          )}
+          <Heart
+            className={`h-4 w-4 flex-none transition-colors ${isLiked ? "text-red-20 fill-red-20" : "text-gray-60"}`}
+          />
 
           {likeCount > 0 && <span className="text-detail-12m">{likeCount}</span>}
         </button>
