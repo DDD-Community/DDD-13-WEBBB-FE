@@ -1,11 +1,16 @@
 "use client";
 
+import { ApiError } from "@/api/client";
+import { checkEmail, signupEmail } from "@/api/endpoints/auth";
 import X from "@/assets/icons/ic_x.svg";
 import XCircle from "@/assets/icons/ic_x_circle.svg";
 import FormField from "@/components/FormField";
 import TextInput from "@/components/TextInput";
+import Toast from "@/components/Toast";
 import { emailSchema, PASSWORD_RULE_LABEL, passwordRules, signupSchema, type SignupInput } from "@/schemas/auth";
+import { useAuthStore } from "@/store/useAuthStore";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
@@ -15,8 +20,22 @@ import TopBar from "@/components/TopBar";
 export default function Signup() {
   const router = useRouter();
 
+  const setAuth = useAuthStore((s) => s.setAuth);
+
   const [availableEmail, setAvailableEmail] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const { mutate: signup, isPending: isSubmitting } = useMutation({
+    mutationFn: signupEmail,
+    onSuccess: ({ user, tokens }) => {
+      setAuth(user, tokens);
+      router.push("/onboarding");
+    },
+    onError: (error) => {
+      setErrorMessage(error instanceof ApiError ? error.message : "회원가입에 실패했어요. 다시 시도해주세요.");
+    },
+  });
 
   const methods = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
@@ -49,12 +68,24 @@ export default function Signup() {
 
     setIsChecking(true);
 
-    // TODO: 실제 서버 중복 확인 API 호출. 중복이면 setError("email", { message: "이미 가입된 이메일입니다" })
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    try {
+      const { available } = await checkEmail(parsed.data);
 
-    setAvailableEmail(parsed.data);
-    clearErrors("email");
-    setIsChecking(false);
+      if (!available) {
+        setAvailableEmail(null);
+        setError("email", { message: "이미 가입된 이메일입니다" });
+        return;
+      }
+
+      setAvailableEmail(parsed.data);
+      clearErrors("email");
+    } catch (error) {
+      setError("email", {
+        message: error instanceof ApiError ? error.message : "중복 확인에 실패했어요. 다시 시도해주세요",
+      });
+    } finally {
+      setIsChecking(false);
+    }
   }
 
   function onSubmit(data: SignupInput) {
@@ -62,11 +93,8 @@ export default function Signup() {
       setError("email", { message: "이메일 중복확인이 필요합니다" });
       return;
     }
-    // TODO: 서버에 회원가입 요청 전송
-    // eslint-disable-next-line no-console
-    console.log("signup submit:", data);
 
-    router.push("/onboarding");
+    signup(data);
   }
 
   const isPasswordTouched = passwordValue.length > 0;
@@ -83,6 +111,7 @@ export default function Signup() {
           </button>
         }
       />
+
       <FormProvider {...methods}>
         <form className="mt-8.5 flex grow flex-col gap-15 px-4" onSubmit={handleSubmit(onSubmit)}>
           <FormField label="이메일 주소" name="email">
@@ -113,7 +142,7 @@ export default function Signup() {
                 중복확인
               </button>
 
-              {isEmailAvailable && <p className="text-detail-12m">사용가능한 메일입니다</p>}
+              {isEmailAvailable && <p className="text-detail-12m text-blue-20">사용 가능한 이메일입니다</p>}
             </div>
           </FormField>
 
@@ -147,12 +176,20 @@ export default function Signup() {
           <button
             type="submit"
             className="text-head-18sb bg-blue-20 disabled:bg-gray-80 mt-auto mb-8 rounded-xl py-3 text-black"
-            disabled={!!errors.email || !!errors.password || emailValue.length === 0 || passwordValue.length === 0}
+            disabled={
+              !!errors.email ||
+              !!errors.password ||
+              emailValue.length === 0 ||
+              passwordValue.length === 0 ||
+              isSubmitting
+            }
           >
             가입완료
           </button>
         </form>
       </FormProvider>
+
+      <Toast message={errorMessage} isOpen={errorMessage.length > 0} onClose={() => setErrorMessage("")} />
     </>
   );
 }

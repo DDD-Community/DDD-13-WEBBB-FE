@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useWriteStore } from "@/store/useWriteStore";
 import TopBarWrite from "@/components/TopBarWrite";
 import Toast from "@/components/Toast";
-import Modal from "../../components/modal";
+import Modal from "@/components/modal";
 
 export const COMMENT_OPTIONS = ["대신 욕해주기", "무조건 위로해주기", "따뜻한 조언해주기", "웃겨주기"];
 
