@@ -4,6 +4,9 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import ArrowLeft from "@/assets/icons/ic_arrow_left_lg.svg";
 import ImgPostNoComment from "@/assets/icons/img_post_no_comment.svg";
+import MoreIcon from "@/assets/icons/ic_more_lg.svg";
+import DeleteIcon from "@/assets/icons/ic_delete.svg";
+import Modal from "@/components/modal";
 
 import CharacterCard from "@/components/CharacterCard";
 import LikeButton from "@/components/LikeButton";
@@ -12,7 +15,12 @@ import CommentItem from "./CommentItem";
 import CommentInput from "./CommentInput";
 import TopBar from "@/components/TopBar";
 
-import { getPostDetail } from "@/api/endpoints/post";
+import useFloating from "@/hooks/useFloating";
+import { FloatingPortal } from "@floating-ui/react";
+
+import { useAuthStore } from "@/store/useAuthStore";
+
+import { getPostDetail, deletePost } from "@/api/endpoints/post";
 import type { PostDetail } from "@/api/endpoints/post";
 
 const JOB_ROLE_MAP: Record<string, string> = {
@@ -65,6 +73,19 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
 
   const [post, setPost] = useState<PostDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { user, _hasHydrated } = useAuthStore();
+
+  const {
+    isOpen: isMenuOpen,
+    setIsOpen: setIsMenuOpen,
+    setReference,
+    setFloating,
+    floatingStyles,
+    getReferenceProps,
+    getFloatingProps,
+  } = useFloating({ placement: "bottom-end", gap: 6 });
 
   useEffect(() => {
     if (isNaN(postId)) return;
@@ -110,20 +131,81 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
     );
   }
 
+  const isMyPost = _hasHydrated && user ? post.author.nickname === user.nickname : false;
+
   const comments = post.comments || [];
   const cardType = EMOTION_TYPE_MAP[post.emotion.type] || "anxious";
   const displayJob = post.author.jobRole ? JOB_ROLE_MAP[post.author.jobRole] || "기타" : "개발";
   const displayCareer = post.author.careerYear ? CAREER_YEAR_MAP[post.author.careerYear] || "기타" : "1년차";
   const supportText = COMMENT_TONE_MAP[post.commentTone] || "무조건 위로해주기";
 
+  const handleDeleteMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    setIsModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deletePost(postId);
+
+      setIsModalOpen(false);
+      router.back();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("게시글 삭제 실패:", error);
+      alert("게시글 삭제 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black pb-[120px]">
       <TopBar
-        className="border-gray-90 sticky top-0 z-50 border-b"
+        className="border-gray-90 sticky top-0 z-50 h-[68px] border-b bg-black px-4 py-[22px]"
         leftContent={
-          <button type="button" aria-label="뒤로가기" onClick={() => router.back()}>
+          <button type="button" aria-label="뒤로가기" onClick={() => router.back()} className="flex items-center">
             <ArrowLeft className="text-gray-30 h-6 w-6" />
           </button>
+        }
+        rightContent={
+          isMyPost && (
+            <div className="relative z-50 flex items-center">
+              <button
+                type="button"
+                ref={setReference}
+                {...getReferenceProps()}
+                aria-label="더보기"
+                className="flex h-6 w-6 items-center justify-center outline-none"
+              >
+                <MoreIcon className="h-6 w-6 text-white" />
+              </button>
+
+              {isMenuOpen && (
+                <FloatingPortal>
+                  <div
+                    ref={setFloating}
+                    style={{
+                      ...floatingStyles,
+                      zIndex: 9999,
+                    }}
+                    {...getFloatingProps()}
+                  >
+                    <button
+                      type="button"
+                      onClick={handleDeleteMenuClick}
+                      className="bg-gray-80 flex w-[169px] items-center justify-between rounded-[8px] px-4 py-3 text-left transition-all outline-none"
+                      style={{
+                        boxShadow: "0 4px 15px 0 rgba(0, 0, 0, 0.35)",
+                      }}
+                    >
+                      <span className="text-body-15m text-white select-none">삭제</span>
+                      <DeleteIcon className="h-5 w-5 flex-none shrink-0 text-white" />
+                    </button>
+                  </div>
+                </FloatingPortal>
+              )}
+            </div>
+          )
         }
       />
 
@@ -175,6 +257,16 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
       </main>
 
       <CommentInput placeholderType={supportText} />
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="게시글을 삭제하시겠어요?"
+        confirmText="확인"
+        cancelText="취소"
+        confirmVariant="blue"
+      />
     </div>
   );
 }
