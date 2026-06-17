@@ -7,7 +7,17 @@ import TopBarWrite from "@/components/TopBarWrite";
 import Toast from "@/components/Toast";
 import Modal from "@/components/modal";
 
+import { createPost } from "@/api/endpoints/post";
+import type { CommentTone } from "@/api/types";
+
 export const COMMENT_OPTIONS = ["대신 욕해주기", "무조건 위로해주기", "따뜻한 조언해주기", "웃겨주기"];
+
+const COMMENT_TONE_MAP: Record<string, CommentTone> = {
+  "대신 욕해주기": "VENT_WITH_ME",
+  "무조건 위로해주기": "COMFORT_ME",
+  "따뜻한 조언해주기": "WARM_ADVICE",
+  웃겨주기: "MAKE_ME_LAUGH",
+};
 
 export default function WritePage() {
   const router = useRouter();
@@ -16,6 +26,8 @@ export default function WritePage() {
   const [isFinishPopupOpen, setIsFinishPopupOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [toast, setToast] = useState({ isOpen: false, message: "" });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleWriteSubmit = () => {
     const hasContent = content.trim().length > 0;
@@ -34,8 +46,32 @@ export default function WritePage() {
     setIsFinishPopupOpen(true);
   };
 
-  const handleRegisterConfirm = () => {
+  const handleRegisterConfirm = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
     setIsFinishPopupOpen(false);
+
+    try {
+      const mappedTone = COMMENT_TONE_MAP[selectedOption];
+
+      const responseData = await createPost({
+        content: content.trim(),
+        commentTone: mappedTone,
+      });
+
+      setContent("");
+      setSelectedOption("");
+
+      router.push(`/post/${responseData.postId}`);
+    } catch {
+      setToast({
+        isOpen: true,
+        message: "글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancelConfirm = () => {
@@ -48,7 +84,7 @@ export default function WritePage() {
   return (
     <div className="flex min-h-screen justify-center bg-black font-sans">
       <div className="relative flex h-[812px] w-full max-w-[375px] flex-col overflow-hidden bg-black">
-        <TopBarWrite onLeftClick={() => setIsCancelPopupOpen(true)} onRightClick={handleWriteSubmit} />
+        <TopBarWrite onLeftClick={() => !isLoading && setIsCancelPopupOpen(true)} onRightClick={handleWriteSubmit} />
 
         <main className="flex-1 overflow-y-auto px-4 pt-4 pb-[40px]">
           <h2 className="text-body-16sb mb-4 leading-[150%] tracking-[-0.32px] text-white">내용 작성</h2>
@@ -61,6 +97,7 @@ export default function WritePage() {
                 maxLength={500}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
+                disabled={isLoading}
               />
             </div>
             <div className="text-detail-12m text-gray-60 mt-1 text-right leading-[150%] tracking-[-0.24px]">
@@ -78,7 +115,8 @@ export default function WritePage() {
                 <button
                   key={option}
                   type="button"
-                  onClick={() => setSelectedOption(option)}
+                  onClick={() => !isLoading && setSelectedOption(option)}
+                  disabled={isLoading}
                   className={`flex h-[44px] w-full items-center justify-center gap-[10px] rounded-[12px] px-10 py-3 transition-colors duration-200 ${
                     isActive ? "bg-blue-20 text-body-14sb text-black" : "bg-gray-90 text-gray-20 text-body-14m"
                   }`}
