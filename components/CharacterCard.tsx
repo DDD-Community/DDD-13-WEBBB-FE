@@ -7,9 +7,20 @@ import Heart from "@/assets/icons/ic_heart.svg";
 import Comment from "@/assets/icons/ic_comment.svg";
 
 type CharacterType = "helpless" | "anxious" | "lonely" | "selfHate" | "annoyed";
-type CharacterCardProps = {
-  profile?: boolean; // TODO: 나중에 실제 유저 프로필 받도록 수정
+
+export type CharacterCardProps = {
+  profile?: boolean;
   type: CharacterType;
+  postId?: number;
+  authorNickname?: string | null;
+  jobRole?: string | null;
+  careerYear?: string | null;
+  createdAt?: string;
+  contentPreview?: string;
+  hp?: number;
+  maxHp?: number;
+  likeCount?: number;
+  commentCount?: number;
 };
 
 const CHARACTER_THEME: Record<CharacterType, { label: string; src: string }> = {
@@ -76,34 +87,98 @@ const characterBarStyle: (props: { character: CharacterType }) => string = cva("
   },
 });
 
-export default function CharacterCard({ profile = true, type }: CharacterCardProps) {
+const JOB_ROLE_MAP: Record<string, string> = {
+  DEVELOPMENT: "개발",
+  PLANNING: "기획",
+  DESIGN: "디자인",
+  MARKETING: "마케팅",
+  SALES: "영업",
+  HR: "인사",
+  GENERAL_AFFAIRS: "총무",
+  PRODUCTION: "생산",
+  ACCOUNTING: "회계",
+  OTHER: "기타",
+};
+
+const CAREER_YEAR_MAP: Record<string, string> = {
+  NEWCOMER: "신입",
+  YEAR_1: "1년차",
+  YEAR_2: "2년차",
+  YEAR_3: "3년차",
+  YEAR_4: "4년차",
+  YEAR_5: "5년차",
+  YEAR_6: "6년차",
+  YEAR_7_PLUS: "7년차 이상",
+};
+
+function getTimeAgo(dateString?: string) {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "방금 전";
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}시간 전`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) return `${diffInDays}일 전`;
+  return date.toLocaleDateString();
+}
+
+export default function CharacterCard({
+  profile = true,
+  type,
+  postId,
+  authorNickname,
+  jobRole,
+  careerYear,
+  createdAt,
+  contentPreview,
+  hp,
+  maxHp,
+  likeCount,
+  commentCount,
+}: CharacterCardProps) {
   const character = CHARACTER_THEME[type];
+
+  const linkHref = postId ? `/post/${postId}` : "/#";
+  const displayNickname = authorNickname || "닉네임";
+  const displayJob = jobRole ? JOB_ROLE_MAP[jobRole] || "기타" : "개발";
+  const displayCareer = careerYear ? CAREER_YEAR_MAP[careerYear] || "기타" : "1년차";
+  const displayTimeAgo = getTimeAgo(createdAt) || "1시간 전";
+  const displayContent =
+    contentPreview ||
+    "이직 준비 시작하기 진짜 힘들다... 주말에 아무것도 안하고 누워있기만 함 ㅠㅠ 내 자신이 한심해. 어떻게 해야할까? 이직 준비 시작하기 진짜 힘들다... 주말에 아무것도 안하고 누워있기만 함 ㅠㅠ 내 자신이 한심해. 어떻게 해야할까? 이직 준비 시작하기 진짜 힘들다... 주말에 아무것도 안하고 누워있기만 함 ㅠㅠ 내 자신이 한심해. 어떻게 해야할까?";
+
+  const currentHp = hp ?? 20;
+  const maximumHp = maxHp ?? 30;
+  const hpPercent = maximumHp > 0 ? (currentHp / maximumHp) * 100 : 0;
+
+  const displayLikes = likeCount ?? 4;
+  const displayComments = commentCount ?? 4;
 
   return (
     <div className="list-none">
-      <Link prefetch={false} href="/#" className={characterCardStyle({ character: type })}>
+      <Link prefetch={false} href={linkHref} className={characterCardStyle({ character: type })}>
         {profile && (
           <>
             <div className="text-detail-12m text-gray-60 mb-3 flex w-full items-center justify-between">
               <div className="flex items-center gap-0.5">
                 <p className="text-gray-30 after:bg-gray-60 flex items-center gap-2 after:mx-1.5 after:block after:h-2 after:w-px after:flex-none after:rounded-full after:content-['']">
-                  닉네임
+                  {displayNickname}
                 </p>
 
-                <p>개발</p>
+                <p>{displayJob}</p>
                 <p>·</p>
-                <p>1년차</p>
+                <p>{displayCareer}</p>
               </div>
 
-              <p>1시간 전</p>
+              <p>{displayTimeAgo}</p>
             </div>
 
-            <p className="text-body-15sb mb-4 line-clamp-2 w-full text-white">
-              이직 준비 시작하기 진짜 힘들다... 주말에 아무것도 안하고 누워있기만 함 ㅠㅠ 내 자신이 한심해. 어떻게
-              해야할까? 이직 준비 시작하기 진짜 힘들다... 주말에 아무것도 안하고 누워있기만 함 ㅠㅠ 내 자신이 한심해.
-              어떻게 해야할까? 이직 준비 시작하기 진짜 힘들다... 주말에 아무것도 안하고 누워있기만 함 ㅠㅠ 내 자신이
-              한심해. 어떻게 해야할까?
-            </p>
+            <p className="text-body-15sb mb-4 line-clamp-2 w-full text-white">{displayContent}</p>
           </>
         )}
 
@@ -123,11 +198,13 @@ export default function CharacterCard({ profile = true, type }: CharacterCardPro
             <div className="mb-1">
               <div className="text-detail-13m text-gray-60 mb-1.5 flex items-center justify-between">
                 <p>HP</p>
-                <p>20/30</p>
+                <p>
+                  {currentHp}/{maximumHp}
+                </p>
               </div>
 
               <div className="bg-gray-80 h-2 w-full overflow-hidden rounded-full">
-                <div className={characterBarStyle({ character: type })} style={{ width: `${(20 / 30) * 100}%` }} />
+                <div className={characterBarStyle({ character: type })} style={{ width: `${hpPercent}%` }} />
               </div>
             </div>
           </div>
@@ -142,7 +219,7 @@ export default function CharacterCard({ profile = true, type }: CharacterCardPro
               <Heart className="fill-red-20 text-red-20 h-4 w-4 flex-none" />
               <span>공감하기</span>
               <span>·</span>
-              <span>4</span>
+              <span>{displayLikes}</span>
             </button>
 
             <button
@@ -152,7 +229,7 @@ export default function CharacterCard({ profile = true, type }: CharacterCardPro
               <Comment className="h-4 w-4 flex-none" />
               <span>무조건 위로해주기</span>
               <span>·</span>
-              <span>4</span>
+              <span>{displayComments}</span>
             </button>
           </div>
         )}
