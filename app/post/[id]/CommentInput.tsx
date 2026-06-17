@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import type { SupportType } from "./mockData";
 
 interface CommentInputProps {
-  placeholderType: SupportType;
+  placeholderType: string;
 }
 
 export default function CommentInput({ placeholderType }: CommentInputProps) {
