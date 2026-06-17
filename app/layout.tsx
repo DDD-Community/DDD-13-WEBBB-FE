@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "@/styles/globals.css";
+import Providers from "./providers";
 
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
@@ -22,7 +23,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
       <body>
         <div className="flex min-h-screen w-full justify-center overflow-y-auto bg-black font-sans">
-          <main className="relative flex w-full max-w-2xl flex-col bg-black">{children}</main>
+          <main className="relative flex w-full max-w-2xl flex-col bg-black">
+            <Providers>{children}</Providers>
+          </main>
         </div>
       </body>
     </html>

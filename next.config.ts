@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const API_ORIGIN = process.env.API_ORIGIN;
+
 const nextConfig: NextConfig = {
   turbopack: {
     rules: {
@@ -8,6 +10,14 @@ const nextConfig: NextConfig = {
         as: "*.js",
       },
     },
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${API_ORIGIN}/api/:path*`,
+      },
+    ];
   },
 };
 
