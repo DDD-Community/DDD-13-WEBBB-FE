@@ -1,5 +1,5 @@
-import { http } from "@/api/client";
-import type { CareerYear, JobRole } from "@/api/types";
+import { http } from "@/services/client";
+import type { CareerYear, JobRole } from "@/services/types";
 
 // 응답 DTO (백엔드 AuthResponse 와 일치) ──────────────────────────────
 
@@ -12,14 +12,8 @@ export interface AuthUser {
   status: string;
 }
 
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
-export interface AuthResult {
+export interface AuthSuccess {
   user: AuthUser;
-  tokens: AuthTokens;
   isNewUser: boolean;
 }
 
@@ -40,15 +34,11 @@ export interface EmailSignupBody {
 
 // 요청 함수 (순수, React 의존 없음) ──────────────────────────────────
 
-export const loginEmail = (body: EmailLoginBody) =>
-  http.post<AuthResult>("/api/auth/login/email", body, { auth: false });
+export const loginEmail = (body: EmailLoginBody) => http.post<AuthSuccess>("/api/auth/login/email", body);
 
-export const signupEmail = (body: EmailSignupBody) =>
-  http.post<AuthResult>("/api/auth/signup/email", body, { auth: false });
+export const signupEmail = (body: EmailSignupBody) => http.post<AuthSuccess>("/api/auth/signup/email", body);
 
 export const checkEmail = (email: string) =>
-  http.get<{ available: boolean }>(`/api/auth/email/check?email=${encodeURIComponent(email)}`, {
-    auth: false,
-  });
+  http.get<{ available: boolean }>(`/api/auth/email/check?email=${encodeURIComponent(email)}`);
 
 export const logout = () => http.post<null>("/api/auth/logout");

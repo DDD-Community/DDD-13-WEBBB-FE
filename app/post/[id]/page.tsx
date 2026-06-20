@@ -20,8 +20,8 @@ import { FloatingPortal } from "@floating-ui/react";
 
 import { useAuthStore } from "@/store/useAuthStore";
 
-import { getPostDetail, deletePost } from "@/api/endpoints/post";
-import type { PostDetail } from "@/api/endpoints/post";
+import { getPostDetail, deletePost } from "@/services/endpoints/post";
+import type { PostDetail } from "@/services/endpoints/post";
 
 const JOB_ROLE_MAP: Record<string, string> = {
   DEVELOPMENT: "개발",
