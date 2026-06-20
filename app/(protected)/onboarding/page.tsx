@@ -1,7 +1,7 @@
 "use client";
 
 import { ApiError } from "@/services/client";
-import { checkNickname, updateMyProfile } from "@/services/endpoints/users";
+import { checkNickname, updateUserById, type UserProfileUpdateBody } from "@/services/endpoints/users";
 import type { CareerYear, JobRole } from "@/services/types";
 import X from "@/assets/icons/ic_x.svg";
 import XCircle from "@/assets/icons/ic_x_circle.svg";
@@ -60,6 +60,7 @@ const CAREER_TO_API = {
 export default function Onboarding() {
   const router = useRouter();
   const updateUser = useAuthStore((s) => s.updateUser);
+  const myId = useAuthStore((s) => s.user?.id);
 
   const [step, setStep] = useState<Step>(1);
   const [availableNickname, setAvailableNickname] = useState<string | null>(null);
@@ -67,7 +68,10 @@ export default function Onboarding() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const { mutate: submitOnboarding, isPending: isSubmitting } = useMutation({
-    mutationFn: updateMyProfile,
+    mutationFn: (body: UserProfileUpdateBody) => {
+      if (!myId) throw new ApiError(401, "로그인 정보를 확인할 수 없어요. 다시 로그인해주세요.");
+      return updateUserById(myId, body);
+    },
     onSuccess: (user) => {
       updateUser({
         nickname: user.nickname,

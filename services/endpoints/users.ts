@@ -20,5 +20,5 @@ export interface UserProfileUpdateBody {
 export const checkNickname = (value: string) =>
   http.get<{ available: boolean }>(`/api/users/nickname/check?value=${encodeURIComponent(value)}`);
 
-export const updateMyProfile = (body: UserProfileUpdateBody) =>
-  http.patch<UserMeResponse>("/api/users/me/profile", body);
+export const updateUserById = (id: string, body: UserProfileUpdateBody) =>
+  http.patch<UserMeResponse>(`/api/users/${id}`, body);
