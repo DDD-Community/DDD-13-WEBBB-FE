@@ -82,8 +82,8 @@ export default function WritePage() {
   };
 
   return (
-    <div className="flex min-h-screen justify-center bg-black font-sans">
-      <div className="relative flex h-[812px] w-full max-w-[375px] flex-col overflow-hidden bg-black">
+    <>
+      <div className="relative flex w-full max-w-2xl flex-col overflow-hidden">
         <TopBarWrite onLeftClick={() => !isLoading && setIsCancelPopupOpen(true)} onRightClick={handleWriteSubmit} />
 
         <main className="flex-1 overflow-y-auto px-4 pt-4 pb-[40px]">
@@ -92,7 +92,7 @@ export default function WritePage() {
           <div className="w-full">
             <div className="bg-gray-90 focus-within:border-blue-20 flex h-[320px] w-full items-start gap-[10px] rounded-[12px] border border-transparent transition-colors duration-200">
               <textarea
-                className="text-body-15m placeholder:text-gray-60 h-full w-full resize-none bg-transparent leading-[150%] tracking-[-0.3px] text-white outline-none"
+                className="text-body-15m placeholder:text-gray-60 h-full w-full resize-none bg-transparent p-4 text-white outline-none"
                 placeholder="말하기 힘든 감정을 오구오구에 털어놓아 보세요!"
                 maxLength={500}
                 value={content}
@@ -153,6 +153,6 @@ export default function WritePage() {
         confirmText="취소하기"
         confirmVariant="red"
       />
-    </div>
+    </>
   );
 }

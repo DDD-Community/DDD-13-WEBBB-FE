@@ -9,6 +9,7 @@ import useFloating from "@/hooks/useFloating";
 import useScrollLock from "@/hooks/useScrollLock";
 import { useState } from "react";
 import { FloatingPortal } from "@floating-ui/react";
+import TopBar from "@/components/TopBar";
 
 const filterOptions = {
   job: ["전체", "기획", "디자인", "개발", "마케팅", "영업", "인사", "총무", "생산", "회계"],
@@ -112,13 +113,16 @@ export default function Filter() {
           <div className="fixed inset-0 z-20 flex items-center justify-center bg-black">
             <div className="flex h-full w-full max-w-2xl flex-col">
               <div className="sticky top-0 bg-black">
-                <div className="text-head-22sb flex items-center gap-2 px-4 pt-6 pb-5">
-                  <button type="button" onClick={() => setIsFilterOpen(false)}>
-                    <ArrowLeft className="h-6 w-6 flex-none text-white" />
-                  </button>
-
-                  <p>필터</p>
-                </div>
+                <TopBar
+                  leftContent={
+                    <button type="button" onClick={() => setIsFilterOpen(false)}>
+                      <ArrowLeft className="h-6 w-6 flex-none text-white" />
+                    </button>
+                  }
+                  title="필터"
+                  className="gap-2"
+                  titleClassName="w-full text-head-22sb"
+                />
 
                 <div className="border-gray-80 text-head-18m text-gray-60 flex border-b">
                   <button
