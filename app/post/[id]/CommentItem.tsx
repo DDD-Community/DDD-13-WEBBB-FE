@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import type { Comment } from "./mockData";
 import MoreIcon from "@/assets/icons/ic_more_sm_white.svg";
 import DeleteIcon from "@/assets/icons/ic_delete.svg";
 import Modal from "@/components/modal";
@@ -10,12 +9,35 @@ import Heart from "@/assets/icons/ic_heart.svg";
 import useFloating from "@/hooks/useFloating";
 import { FloatingPortal } from "@floating-ui/react";
 
-export default function CommentItem({ comment }: { comment: Comment }) {
+import type { PostComment } from "@/api/endpoints/post";
+
+interface CommentItemProps {
+  comment: PostComment;
+}
+
+function getTimeAgo(dateString?: string) {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "방금 전";
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}시간 전`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) return `${diffInDays}일 전`;
+  return date.toLocaleDateString();
+}
+
+export default function CommentItem({ comment }: CommentItemProps) {
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(comment.likeCount);
+
+  const [likeCount, setLikeCount] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const isMine = comment.author.nickname === "이직귀찮";
+  const isMine = comment.authorNickname === "이직귀찮";
 
   const {
     isOpen: isMenuOpen,
@@ -46,17 +68,20 @@ export default function CommentItem({ comment }: { comment: Comment }) {
     setIsModalOpen(false);
   };
 
+  const displayTimeAgo = getTimeAgo(comment.createdAt) || "방금 전";
+
   return (
     <li className="relative">
       <div className="flex w-full items-start justify-between">
         <div className="flex w-full flex-col">
           <div className="flex items-center gap-2">
-            <span className="text-detail-12sb text-white">{comment.author.nickname}</span>
+            <span className="text-detail-12sb text-white">{comment.authorNickname}</span>
+
             <div className="bg-gray-60 h-2.5 w-[1px]" />
             <div className="text-gray-60 flex items-center gap-0.5">
-              <span className="text-detail-12m">{comment.author.job}</span>
+              <span className="text-detail-12m">개발</span>
               <span className="text-detail-12m">·</span>
-              <span className="text-detail-12m">{comment.author.experience}</span>
+              <span className="text-detail-12m">1년차</span>
             </div>
           </div>
 
@@ -97,7 +122,7 @@ export default function CommentItem({ comment }: { comment: Comment }) {
       </div>
 
       <div className="mt-3 flex items-center">
-        <span className="text-detail-12m text-gray-60">{comment.createdAt}</span>
+        <span className="text-detail-12m text-gray-60">{displayTimeAgo}</span>
         <button
           type="button"
           onClick={handleLikeClick}

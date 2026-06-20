@@ -1,9 +1,7 @@
 "use client";
 
-import type { SupportType } from "./mockData";
-
 interface SpeechBubbleProps {
-  text: SupportType;
+  text: string;
 }
 
 export default function SpeechBubble({ text }: SpeechBubbleProps) {
