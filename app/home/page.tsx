@@ -5,8 +5,8 @@ import Filter from "./Filter";
 import MainTopBar from "@/components/MainTopBar";
 import WriteButton from "./WriteButton";
 import CharacterCard from "@/components/CharacterCard";
-import { getPosts } from "@/api/endpoints/post";
-import type { PostListItem } from "@/api/endpoints/post";
+import { getPosts } from "@/services/endpoints/post";
+import type { PostListItem } from "@/services/endpoints/post";
 
 const EMOTION_TYPE_MAP: Record<string, "anxious" | "helpless" | "lonely" | "selfHate" | "annoyed"> = {
   ANXIETY: "anxious",

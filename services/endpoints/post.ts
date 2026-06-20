@@ -1,5 +1,5 @@
-import { http } from "@/api/client";
-import type { JobRole, CareerYear, CommentTone, MonsterStatus } from "@/api/types";
+import { http } from "@/services/client";
+import type { JobRole, CareerYear, CommentTone, MonsterStatus } from "@/services/types";
 
 export interface PostAuthor {
   id: string;

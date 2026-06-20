@@ -1,7 +1,7 @@
 "use client";
 
-import { ApiError } from "@/api/client";
-import { loginEmail } from "@/api/endpoints/auth";
+import { ApiError } from "@/services/client";
+import { loginEmail } from "@/services/endpoints/auth";
 import X from "@/assets/icons/ic_x.svg";
 import XCircle from "@/assets/icons/ic_x_circle.svg";
 import FormField from "@/components/FormField";
@@ -19,13 +19,13 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 
 export default function EmailLogin() {
   const router = useRouter();
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const setUser = useAuthStore((s) => s.setUser);
   const [errorMessage, setErrorMessage] = useState("");
 
   const { mutate: login, isPending } = useMutation({
     mutationFn: loginEmail,
-    onSuccess: ({ user, tokens }) => {
-      setAuth(user, tokens);
+    onSuccess: ({ user }) => {
+      setUser(user);
       router.replace("/home");
     },
     onError: (error) => {

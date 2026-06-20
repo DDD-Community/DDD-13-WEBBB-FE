@@ -7,8 +7,8 @@ import TopBarWrite from "@/components/TopBarWrite";
 import Toast from "@/components/Toast";
 import Modal from "@/components/modal";
 
-import { createPost } from "@/api/endpoints/post";
-import type { CommentTone } from "@/api/types";
+import { createPost } from "@/services/endpoints/post";
+import type { CommentTone } from "@/services/types";
 
 export const COMMENT_OPTIONS = ["대신 욕해주기", "무조건 위로해주기", "따뜻한 조언해주기", "웃겨주기"];
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { ApiError } from "@/api/client";
-import { checkEmail, signupEmail } from "@/api/endpoints/auth";
+import { ApiError } from "@/services/client";
+import { checkEmail, signupEmail } from "@/services/endpoints/auth";
 import X from "@/assets/icons/ic_x.svg";
 import XCircle from "@/assets/icons/ic_x_circle.svg";
 import FormField from "@/components/FormField";
@@ -20,7 +20,7 @@ import TopBar from "@/components/TopBar";
 export default function Signup() {
   const router = useRouter();
 
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const setUser = useAuthStore((s) => s.setUser);
 
   const [availableEmail, setAvailableEmail] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
@@ -28,8 +28,8 @@ export default function Signup() {
 
   const { mutate: signup, isPending: isSubmitting } = useMutation({
     mutationFn: signupEmail,
-    onSuccess: ({ user, tokens }) => {
-      setAuth(user, tokens);
+    onSuccess: ({ user }) => {
+      setUser(user);
       router.push("/onboarding");
     },
     onError: (error) => {

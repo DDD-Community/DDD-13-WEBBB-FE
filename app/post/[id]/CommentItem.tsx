@@ -9,7 +9,7 @@ import Heart from "@/assets/icons/ic_heart.svg";
 import useFloating from "@/hooks/useFloating";
 import { FloatingPortal } from "@floating-ui/react";
 
-import type { PostComment } from "@/api/endpoints/post";
+import type { PostComment } from "@/services/endpoints/post";
 
 interface CommentItemProps {
   comment: PostComment;
