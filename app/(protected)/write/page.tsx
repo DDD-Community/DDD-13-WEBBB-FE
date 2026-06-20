@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWriteStore } from "@/store/useWriteStore";
 import TopBarWrite from "@/components/TopBarWrite";
 import Toast from "@/components/Toast";
 import Modal from "@/components/modal";
 
 import { createPost } from "@/services/endpoints/post";
+import { postKeys } from "@/services/query-keys";
 import type { CommentTone } from "@/services/types";
 
 export const COMMENT_OPTIONS = ["대신 욕해주기", "무조건 위로해주기", "따뜻한 조언해주기", "웃겨주기"];
@@ -21,13 +23,33 @@ const COMMENT_TONE_MAP: Record<string, CommentTone> = {
 
 export default function WritePage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { content, setContent, selectedOption, setSelectedOption } = useWriteStore();
 
   const [isFinishPopupOpen, setIsFinishPopupOpen] = useState(false);
   const [isCancelPopupOpen, setIsCancelPopupOpen] = useState(false);
   const [toast, setToast] = useState({ isOpen: false, message: "" });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const { mutate: registerPost, isPending: isLoading } = useMutation({
+    mutationFn: () =>
+      createPost({
+        content: content.trim(),
+        commentTone: COMMENT_TONE_MAP[selectedOption],
+      }),
+    onSuccess: (post) => {
+      // 상세 쿼리 캐시를 미리 심어 이동 시 로딩 없이 즉시 렌더되게 함
+      queryClient.setQueryData(postKeys.detail(post.postId), post);
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+
+      router.replace(`/post/${post.postId}`);
+    },
+    onError: () => {
+      setToast({
+        isOpen: true,
+        message: "글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      });
+    },
+  });
 
   const handleWriteSubmit = () => {
     const hasContent = content.trim().length > 0;
@@ -46,32 +68,11 @@ export default function WritePage() {
     setIsFinishPopupOpen(true);
   };
 
-  const handleRegisterConfirm = async () => {
+  const handleRegisterConfirm = () => {
     if (isLoading) return;
 
-    setIsLoading(true);
     setIsFinishPopupOpen(false);
-
-    try {
-      const mappedTone = COMMENT_TONE_MAP[selectedOption];
-
-      const responseData = await createPost({
-        content: content.trim(),
-        commentTone: mappedTone,
-      });
-
-      setContent("");
-      setSelectedOption("");
-
-      router.push(`/post/${responseData.postId}`);
-    } catch {
-      setToast({
-        isOpen: true,
-        message: "글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    registerPost();
   };
 
   const handleCancelConfirm = () => {

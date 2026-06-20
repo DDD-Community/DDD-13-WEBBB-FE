@@ -29,7 +29,7 @@ export default function Modal({
 }: ModalProps) {
   if (!isOpen) return null;
 
-  const confirmBtnBg = confirmVariant === "red" ? "bg-red-20" : "bg-blue-20";
+  const confirmBtnBg = confirmVariant === "red" ? "bg-red-20" : "bg-blue-30";
 
   return (
     <div
