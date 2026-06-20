@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useRef, useState, use } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ArrowLeft from "@/assets/icons/ic_arrow_left_lg.svg";
 import ImgPostNoComment from "@/assets/icons/img_post_no_comment.svg";
 import MoreIcon from "@/assets/icons/ic_more_lg.svg";
@@ -21,7 +22,8 @@ import { FloatingPortal } from "@floating-ui/react";
 import { useAuthStore } from "@/store/useAuthStore";
 
 import { getPostDetail, deletePost } from "@/services/endpoints/post";
-import type { PostDetail } from "@/services/endpoints/post";
+import { createComment } from "@/services/endpoints/comment";
+import { postKeys } from "@/services/query-keys";
 
 const JOB_ROLE_MAP: Record<string, string> = {
   DEVELOPMENT: "개발",
@@ -71,9 +73,11 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
   const { id } = use(params);
   const postId = Number(id);
 
-  const [post, setPost] = useState<PostDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAttacking, setIsAttacking] = useState(false);
+  const attackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { user, _hasHydrated } = useAuthStore();
 
@@ -87,28 +91,42 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
     getFloatingProps,
   } = useFloating({ placement: "bottom-end", gap: 6 });
 
+  const {
+    data: post,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: postKeys.detail(postId),
+    queryFn: () => getPostDetail(postId),
+    enabled: !Number.isNaN(postId),
+  });
+
+  const { mutateAsync: submitComment, isPending: isSubmitting } = useMutation({
+    mutationFn: (content: string) => createComment(postId, { content }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) });
+      triggerAttack();
+    },
+    onError: (error) => {
+      // eslint-disable-next-line no-console
+      console.error("댓글 등록 실패:", error);
+      alert("댓글 등록 중 오류가 발생했습니다.");
+    },
+  });
+
+  const triggerAttack = () => {
+    if (attackTimerRef.current) clearTimeout(attackTimerRef.current);
+    setIsAttacking(true);
+    attackTimerRef.current = setTimeout(() => setIsAttacking(false), 3000);
+  };
+
   useEffect(() => {
-    if (isNaN(postId)) return;
-
-    const fetchPostDetail = async () => {
-      try {
-        setIsLoading(true);
-        const response = await getPostDetail(postId);
-        if (response) {
-          setPost(response);
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error("게시글 상세 조회 실패:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    return () => {
+      if (attackTimerRef.current) clearTimeout(attackTimerRef.current);
     };
+  }, []);
 
-    fetchPostDetail();
-  }, [postId]);
-
-  if (isLoading) {
+  if (!Number.isNaN(postId) && isPending) {
     return (
       <div className="text-gray-40 text-body-14m flex min-h-screen items-center justify-center bg-black">
         고민 글을 불러오는 중입니다...
@@ -116,7 +134,7 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
     );
   }
 
-  if (!post) {
+  if (isError || !post) {
     return (
       <div className="text-gray-40 text-body-14m flex min-h-screen flex-col items-center justify-center gap-4 bg-black">
         존재하지 않거나 삭제된 게시글입니다.
@@ -223,7 +241,13 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
         </div>
 
         <div className="mt-6 px-4">
-          <CharacterCard profile={false} type={cardType} hp={post.monster.hp} maxHp={post.monster.maxHp} />
+          <CharacterCard
+            profile={false}
+            type={cardType}
+            hp={post.monster.hp}
+            maxHp={post.monster.maxHp}
+            isAttacking={isAttacking}
+          />
         </div>
 
         <div className="mt-5 px-4">
@@ -256,7 +280,13 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
         )}
       </main>
 
-      <CommentInput placeholderType={supportText} />
+      <CommentInput
+        placeholderType={supportText}
+        onSubmit={async (content) => {
+          await submitComment(content);
+        }}
+        isSubmitting={isSubmitting}
+      />
 
       <Modal
         isOpen={isModalOpen}
