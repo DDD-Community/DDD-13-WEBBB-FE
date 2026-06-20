@@ -143,7 +143,7 @@ export default function CharacterCard({
 }: CharacterCardProps) {
   const character = CHARACTER_THEME[type];
 
-  const linkHref = postId ? `/post/${postId}` : "/#";
+  const linkHref = postId ? `/post/${postId}` : undefined;
   const displayNickname = authorNickname || "닉네임";
   const displayJob = jobRole ? JOB_ROLE_MAP[jobRole] || "기타" : "개발";
   const displayCareer = careerYear ? CAREER_YEAR_MAP[careerYear] || "기타" : "1년차";
@@ -159,81 +159,91 @@ export default function CharacterCard({
   const displayLikes = likeCount ?? 4;
   const displayComments = commentCount ?? 4;
 
-  return (
-    <div className="list-none">
-      <Link prefetch={false} href={linkHref} className={characterCardStyle({ character: type })}>
-        {profile && (
-          <>
-            <div className="text-detail-12m text-gray-60 mb-3 flex w-full items-center justify-between">
-              <div className="flex items-center gap-0.5">
-                <p className="text-gray-30 after:bg-gray-60 flex items-center gap-2 after:mx-1.5 after:block after:h-2 after:w-px after:flex-none after:rounded-full after:content-['']">
-                  {displayNickname}
-                </p>
+  const content = (
+    <>
+      {profile && (
+        <>
+          <div className="text-detail-12m text-gray-60 mb-3 flex w-full items-center justify-between">
+            <div className="flex items-center gap-0.5">
+              <p className="text-gray-30 after:bg-gray-60 flex items-center gap-2 after:mx-1.5 after:block after:h-2 after:w-px after:flex-none after:rounded-full after:content-['']">
+                {displayNickname}
+              </p>
 
-                <p>{displayJob}</p>
-                <p>·</p>
-                <p>{displayCareer}</p>
-              </div>
-
-              <p>{displayTimeAgo}</p>
+              <p>{displayJob}</p>
+              <p>·</p>
+              <p>{displayCareer}</p>
             </div>
 
-            <p className="text-body-15sb mb-4 line-clamp-2 w-full text-white">{displayContent}</p>
-          </>
-        )}
+            <p>{displayTimeAgo}</p>
+          </div>
 
-        <div className="flex w-full items-end gap-5.5 px-4.5">
-          <Image
-            src={character.src}
-            alt={`${character.label} 캐릭터`}
-            width={88}
-            height={96}
-            priority={false}
-            className="flex-none"
-          />
+          <p className="text-body-15sb mb-4 line-clamp-2 w-full text-white">{displayContent}</p>
+        </>
+      )}
 
-          <div className="flex w-full flex-col gap-2.5">
-            <div className={characterLabelStyle({ character: type })}>{character.label} 몬스터</div>
+      <div className="flex w-full items-end gap-5.5 px-4.5">
+        <Image
+          src={character.src}
+          alt={`${character.label} 캐릭터`}
+          width={88}
+          height={96}
+          priority={false}
+          className="flex-none"
+        />
 
-            <div className="mb-1">
-              <div className="text-detail-13m text-gray-60 mb-1.5 flex items-center justify-between">
-                <p>HP</p>
-                <p>
-                  {currentHp}/{maximumHp}
-                </p>
-              </div>
+        <div className="flex w-full flex-col gap-2.5">
+          <div className={characterLabelStyle({ character: type })}>{character.label} 몬스터</div>
 
-              <div className="bg-gray-80 h-2 w-full overflow-hidden rounded-full">
-                <div className={characterBarStyle({ character: type })} style={{ width: `${hpPercent}%` }} />
-              </div>
+          <div className="mb-1">
+            <div className="text-detail-13m text-gray-60 mb-1.5 flex items-center justify-between">
+              <p>HP</p>
+              <p>
+                {currentHp}/{maximumHp}
+              </p>
+            </div>
+
+            <div className="bg-gray-80 h-2 w-full overflow-hidden rounded-full">
+              <div className={characterBarStyle({ character: type })} style={{ width: `${hpPercent}%` }} />
             </div>
           </div>
         </div>
+      </div>
 
-        {profile && (
-          <div className="mt-5 flex w-full gap-3">
-            <button
-              type="button"
-              className="text-detail-13m text-gray-30 flex items-center gap-0.5 rounded-sm bg-black/30 px-2 py-1.25"
-            >
-              <Heart className="fill-red-20 text-red-20 h-4 w-4 flex-none" />
-              <span>공감하기</span>
-              <span>·</span>
-              <span>{displayLikes}</span>
-            </button>
+      {profile && (
+        <div className="mt-5 flex w-full gap-3">
+          <button
+            type="button"
+            className="text-detail-13m text-gray-30 flex items-center gap-0.5 rounded-sm bg-black/30 px-2 py-1.25"
+          >
+            <Heart className="fill-red-20 text-red-20 h-4 w-4 flex-none" />
+            <span>공감하기</span>
+            <span>·</span>
+            <span>{displayLikes}</span>
+          </button>
 
-            <button
-              type="button"
-              className="text-detail-13m text-gray-30 flex items-center gap-0.5 rounded-sm bg-black/30 px-2 py-1.25"
-            >
-              <Comment className="h-4 w-4 flex-none" />
-              <span>무조건 위로해주기</span>
-              <span>·</span>
-              <span>{displayComments}</span>
-            </button>
-          </div>
-        )}
-      </Link>
+          <button
+            type="button"
+            className="text-detail-13m text-gray-30 flex items-center gap-0.5 rounded-sm bg-black/30 px-2 py-1.25"
+          >
+            <Comment className="h-4 w-4 flex-none" />
+            <span>무조건 위로해주기</span>
+            <span>·</span>
+            <span>{displayComments}</span>
+          </button>
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <div className="list-none">
+      {linkHref ? (
+        <Link prefetch={false} href={linkHref} className={characterCardStyle({ character: type })}>
+          {content}
+        </Link>
+      ) : (
+        <div className={characterCardStyle({ character: type })}>{content}</div>
+      )}
     </div>
   );
 }
