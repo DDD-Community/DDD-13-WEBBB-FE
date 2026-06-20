@@ -10,6 +10,7 @@ type CharacterType = "helpless" | "anxious" | "lonely" | "selfHate" | "annoyed";
 
 export type CharacterCardProps = {
   profile?: boolean;
+  isAttacking?: boolean;
   type: CharacterType;
   postId?: number;
   authorNickname?: string | null;
@@ -75,17 +76,20 @@ const characterLabelStyle: (props: { character: CharacterType }) => string = cva
   }
 );
 
-const characterBarStyle: (props: { character: CharacterType }) => string = cva("h-full rounded-full bg-linear-to-r", {
-  variants: {
-    character: {
-      helpless: "from-purple-30 to-purple-20",
-      anxious: "from-orange-30 to-orange-20",
-      lonely: "from-blue-30 to-blue-20",
-      selfHate: "from-green-30 to-green-20",
-      annoyed: "from-red-30 to-red-20",
+const characterBarStyle: (props: { character: CharacterType }) => string = cva(
+  "h-full rounded-full bg-linear-to-r transition-all",
+  {
+    variants: {
+      character: {
+        helpless: "from-purple-30 to-purple-20",
+        anxious: "from-orange-30 to-orange-20",
+        lonely: "from-blue-30 to-blue-20",
+        selfHate: "from-green-30 to-green-20",
+        annoyed: "from-red-30 to-red-20",
+      },
     },
-  },
-});
+  }
+);
 
 const JOB_ROLE_MAP: Record<string, string> = {
   DEVELOPMENT: "개발",
@@ -129,6 +133,7 @@ function getTimeAgo(dateString?: string) {
 
 export default function CharacterCard({
   profile = true,
+  isAttacking = false,
   type,
   postId,
   authorNickname,
@@ -182,14 +187,27 @@ export default function CharacterCard({
       )}
 
       <div className="flex w-full items-end gap-5.5 px-4.5">
-        <Image
-          src={character.src}
-          alt={`${character.label} 캐릭터`}
-          width={88}
-          height={96}
-          priority={false}
-          className="flex-none"
-        />
+        <div className="relative">
+          <Image
+            src={character.src}
+            alt={`${character.label} 캐릭터`}
+            width={88}
+            height={96}
+            priority={false}
+            className="flex-none"
+          />
+
+          {isAttacking && (
+            <Image
+              src="/characters/attack.svg"
+              alt="공격 모션"
+              width={60}
+              height={60}
+              priority={false}
+              className="absolute top-0 -right-5"
+            />
+          )}
+        </div>
 
         <div className="flex w-full flex-col gap-2.5">
           <div className={characterLabelStyle({ character: type })}>{character.label} 몬스터</div>

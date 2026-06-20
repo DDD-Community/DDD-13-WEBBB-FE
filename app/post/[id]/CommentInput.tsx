@@ -4,9 +4,11 @@ import React, { useState, useRef } from "react";
 
 interface CommentInputProps {
   placeholderType: string;
+  onSubmit: (content: string) => Promise<void>;
+  isSubmitting?: boolean;
 }
 
-export default function CommentInput({ placeholderType }: CommentInputProps) {
+export default function CommentInput({ placeholderType, onSubmit, isSubmitting = false }: CommentInputProps) {
   const [commentText, setCommentText] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -32,6 +34,18 @@ export default function CommentInput({ placeholderType }: CommentInputProps) {
       return;
     }
     handleCancel();
+  };
+
+  const handleSubmit = async () => {
+    const content = commentText.trim();
+    if (content.length === 0 || isSubmitting) return;
+
+    try {
+      await onSubmit(content);
+      handleCancel();
+    } catch {
+      // 에러 처리는 상위 mutation onError 에서 수행
+    }
   };
 
   return (
@@ -66,8 +80,10 @@ export default function CommentInput({ placeholderType }: CommentInputProps) {
 
         <button
           type="button"
+          onClick={handleSubmit}
+          disabled={commentText.trim().length === 0 || isSubmitting}
           className={`flex h-[32px] w-[52px] shrink-0 items-center justify-center rounded-[4px] text-center transition-colors ${
-            commentText.trim().length > 0 ? "bg-blue-30 text-white" : "bg-gray-80 text-gray-40"
+            commentText.trim().length > 0 && !isSubmitting ? "bg-blue-30 text-white" : "bg-gray-80 text-gray-40"
           }`}
         >
           <span className="text-body-14m">댓글</span>
