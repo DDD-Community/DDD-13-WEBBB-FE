@@ -29,13 +29,15 @@ export default function Modal({
 }: ModalProps) {
   if (!isOpen) return null;
 
-  const confirmBtnBg = confirmVariant === "red" ? "bg-red-20 text-white" : "bg-blue-20 text-black";
-  const confirmBtnFont = confirmVariant === "red" ? "text-body-15sb" : "text-body-15m";
+  const confirmBtnBg = confirmVariant === "red" ? "bg-red-20" : "bg-blue-20";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 mx-auto flex w-full max-w-2xl items-center justify-center bg-black/60 p-9"
+      onClick={onClose}
+    >
       <div
-        className="relative flex w-[302px] shrink-0 cursor-default flex-col items-center rounded-[12px] bg-white px-4 pt-9 pb-5"
+        className="shadow-1 bg-gray-80 relative flex w-full shrink-0 cursor-default flex-col items-center rounded-[12px] px-4 pt-9 pb-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 캐릭터 이미지 */}
@@ -46,20 +48,10 @@ export default function Modal({
         )}
 
         {/* 메인 문구 */}
-        <h3
-          className={`text-head-18sb text-center leading-[150%] tracking-[-0.36px] whitespace-pre-line text-black ${
-            subTitle ? "mb-1" : "mb-[20px]"
-          }`}
-        >
-          {title}
-        </h3>
+        <h3 className={`text-head-18sb text-center whitespace-pre-line ${subTitle ? "mb-1" : "mb-[20px]"}`}>{title}</h3>
 
         {/* 서브 문구 */}
-        {subTitle && (
-          <p className="text-detail-13m mb-5 text-center leading-[150%] tracking-[-0.26px] whitespace-pre-line text-gray-50">
-            {subTitle}
-          </p>
-        )}
+        {subTitle && <p className="text-detail-13m mb-5 text-center whitespace-pre-line text-gray-50">{subTitle}</p>}
 
         {/* 버튼 영역 */}
         <div className="flex w-full justify-center gap-2">
@@ -67,7 +59,7 @@ export default function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="bg-gray-20 text-gray-60 text-body-15m flex h-[44px] flex-1 items-center justify-center rounded-lg text-center leading-[150%] tracking-[-0.3px]"
+            className="bg-gray-70 text-gray-40 text-body-15m flex h-[44px] flex-1 items-center justify-center rounded-lg text-center"
           >
             {cancelText}
           </button>
@@ -76,7 +68,7 @@ export default function Modal({
           <button
             type="button"
             onClick={onConfirm}
-            className={`flex h-[44px] flex-1 items-center justify-center rounded-lg text-center leading-[150%] tracking-[-0.3px] ${confirmBtnBg} ${confirmBtnFont}`}
+            className={`text-body-15sb flex h-[44px] flex-1 items-center justify-center rounded-lg text-center text-white ${confirmBtnBg}`}
           >
             {confirmText}
           </button>

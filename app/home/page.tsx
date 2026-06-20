@@ -41,12 +41,10 @@ export default function HomePage() {
 
   return (
     <>
-      <div>
-        <MainTopBar />
-        <Filter />
-      </div>
+      <MainTopBar />
+      <Filter />
 
-      <main className="flex-1 overflow-y-auto pb-[100px]">
+      <main className="flex-1 pb-10">
         {isLoading ? (
           <div className="text-gray-40 text-body-14m flex items-center justify-center py-20">
             고민 글을 불러오는 중입니다...

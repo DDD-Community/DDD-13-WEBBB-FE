@@ -36,8 +36,8 @@ export default function MainTopBar() {
       {isMenuOpen && (
         <>
           <div className="fixed inset-0 z-20" onClick={handleMenuClick} />
-          <div className="text-body-16m text-gray-10 absolute top-17 z-20 flex w-full flex-col gap-6 bg-black px-6 py-5">
-            <Link href="#">홈</Link>
+          <div className="text-body-16m text-gray-10 fixed top-17 z-20 flex w-full flex-col gap-6 bg-black px-6 py-5">
+            <Link href="/home">홈</Link>
             <Link href="#">마이페이지</Link>
             <Link href="#">설정</Link>
           </div>
