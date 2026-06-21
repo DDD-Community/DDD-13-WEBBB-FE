@@ -48,6 +48,7 @@ export interface PostListItem {
   careerYear: CareerYear;
   contentPreview: string;
   emotionType: string;
+  commentTone: CommentTone;
   monster: PostMonster;
   likeCount: number;
   commentCount: number;
