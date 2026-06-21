@@ -49,12 +49,12 @@ const CAREER_YEAR_MAP: Record<string, string> = {
   YEAR_7_PLUS: "7년차 이상",
 };
 
-const EMOTION_TYPE_MAP: Record<string, "anxious" | "helpless" | "lonely" | "selfHate" | "annoyed"> = {
-  ANXIETY: "anxious",
-  LETHARGY: "helpless",
-  LONELINESS: "lonely",
-  SELF_DEPRECATION: "selfHate",
-  IRATION: "annoyed",
+const EMOTION_TYPE_MAP: Record<string, "anxiety" | "lethargy" | "loneliness" | "self_deprecation" | "irritation"> = {
+  ANXIETY: "anxiety",
+  LETHARGY: "lethargy",
+  LONELINESS: "loneliness",
+  SELF_DEPRECATION: "self_deprecation",
+  IRRITATION: "irritation",
 };
 
 const COMMENT_TONE_MAP: Record<string, string> = {

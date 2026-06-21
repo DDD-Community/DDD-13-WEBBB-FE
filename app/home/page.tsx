@@ -8,12 +8,12 @@ import CharacterCard from "@/components/CharacterCard";
 import { getPosts } from "@/services/endpoints/post";
 import type { PostListItem } from "@/services/endpoints/post";
 
-const EMOTION_TYPE_MAP: Record<string, "anxious" | "helpless" | "lonely" | "selfHate" | "annoyed"> = {
-  ANXIETY: "anxious",
-  LETHARGY: "helpless",
-  LONELINESS: "lonely",
-  SELF_DEPRECATION: "selfHate",
-  IRRITATION: "annoyed",
+const EMOTION_TYPE_MAP: Record<string, "anxiety" | "lethargy" | "loneliness" | "self_deprecation" | "irritation"> = {
+  ANXIETY: "anxiety",
+  LETHARGY: "lethargy",
+  LONELINESS: "loneliness",
+  SELF_DEPRECATION: "self_deprecation",
+  IRRITATION: "irritation",
 };
 
 export default function HomePage() {
@@ -56,7 +56,7 @@ export default function HomePage() {
         ) : (
           <ul className="flex flex-col gap-4 px-4">
             {posts.map((post) => {
-              const cardType = EMOTION_TYPE_MAP[post.emotionType] || "anxious";
+              const cardType = EMOTION_TYPE_MAP[post.emotionType] || "anxiety";
 
               return (
                 <li key={post.postId}>
@@ -73,6 +73,7 @@ export default function HomePage() {
                     maxHp={post.monster?.maxHp}
                     likeCount={post.likeCount}
                     commentCount={post.commentCount}
+                    commentTone={post.commentTone}
                   />
                 </li>
               );

@@ -5,8 +5,9 @@ import { cva } from "class-variance-authority";
 import Link from "next/link";
 import Heart from "@/assets/icons/ic_heart.svg";
 import Comment from "@/assets/icons/ic_comment.svg";
+import type { CommentTone } from "@/services/types";
 
-type CharacterType = "helpless" | "anxious" | "lonely" | "selfHate" | "annoyed";
+type CharacterType = "anxiety" | "lethargy" | "loneliness" | "self_deprecation" | "irritation";
 
 export type CharacterCardProps = {
   profile?: boolean;
@@ -22,29 +23,22 @@ export type CharacterCardProps = {
   maxHp?: number;
   likeCount?: number;
   commentCount?: number;
+  commentTone?: CommentTone;
 };
 
-const CHARACTER_THEME: Record<CharacterType, { label: string; src: string }> = {
-  helpless: {
-    label: "무기력",
-    src: "/characters/helpless.svg",
-  },
-  anxious: {
-    label: "불안",
-    src: "/characters/anxious.svg",
-  },
-  lonely: {
-    label: "외로움",
-    src: "/characters/lonely.svg",
-  },
-  selfHate: {
-    label: "자기비하",
-    src: "/characters/selfHate.svg",
-  },
-  annoyed: {
-    label: "짜증",
-    src: "/characters/annoyed.svg",
-  },
+const CHARACTER_LABEL: Record<CharacterType, string> = {
+  lethargy: "무기력",
+  anxiety: "불안",
+  loneliness: "외로움",
+  self_deprecation: "자기비하",
+  irritation: "짜증",
+};
+
+const COMMENT_TONE_MAP: Record<CommentTone, string> = {
+  VENT_WITH_ME: "대신 욕해주기",
+  COMFORT_ME: "무조건 위로해주기",
+  WARM_ADVICE: "따뜻한 조언해주기",
+  MAKE_ME_LAUGH: "웃겨주기",
 };
 
 const characterCardStyle: (props: { character: CharacterType }) => string = cva(
@@ -52,11 +46,11 @@ const characterCardStyle: (props: { character: CharacterType }) => string = cva(
   {
     variants: {
       character: {
-        helpless: "to-purple-10",
-        anxious: "to-orange-10",
-        lonely: "to-blue-10",
-        selfHate: "to-green-10",
-        annoyed: "to-red-10",
+        lethargy: "to-purple-10",
+        anxiety: "to-orange-10",
+        loneliness: "to-blue-10",
+        self_deprecation: "to-green-10",
+        irritation: "to-red-10",
       },
     },
   }
@@ -66,11 +60,11 @@ const characterLabelStyle: (props: { character: CharacterType }) => string = cva
   {
     variants: {
       character: {
-        helpless: "bg-purple-10 text-purple-20",
-        anxious: "bg-orange-10 text-orange-20",
-        lonely: "bg-blue-10 text-blue-20",
-        selfHate: "bg-green-10 text-green-20",
-        annoyed: "bg-red-10 text-red-20",
+        lethargy: "bg-purple-10 text-purple-20",
+        anxiety: "bg-orange-10 text-orange-20",
+        loneliness: "bg-blue-10 text-blue-20",
+        self_deprecation: "bg-green-10 text-green-20",
+        irritation: "bg-red-10 text-red-20",
       },
     },
   }
@@ -81,11 +75,11 @@ const characterBarStyle: (props: { character: CharacterType }) => string = cva(
   {
     variants: {
       character: {
-        helpless: "from-purple-30 to-purple-20",
-        anxious: "from-orange-30 to-orange-20",
-        lonely: "from-blue-30 to-blue-20",
-        selfHate: "from-green-30 to-green-20",
-        annoyed: "from-red-30 to-red-20",
+        lethargy: "from-purple-30 to-purple-20",
+        anxiety: "from-orange-30 to-orange-20",
+        loneliness: "from-blue-30 to-blue-20",
+        self_deprecation: "from-green-30 to-green-20",
+        irritation: "from-red-30 to-red-20",
       },
     },
   }
@@ -145,9 +139,8 @@ export default function CharacterCard({
   maxHp,
   likeCount,
   commentCount,
+  commentTone,
 }: CharacterCardProps) {
-  const character = CHARACTER_THEME[type];
-
   const linkHref = postId ? `/post/${postId}` : undefined;
   const displayNickname = authorNickname || "닉네임";
   const displayJob = jobRole ? JOB_ROLE_MAP[jobRole] || "기타" : "개발";
@@ -160,6 +153,12 @@ export default function CharacterCard({
   const currentHp = hp ?? 20;
   const maximumHp = maxHp ?? 30;
   const hpPercent = maximumHp > 0 ? (currentHp / maximumHp) * 100 : 0;
+
+  const isDead = currentHp <= 0;
+  const sizeKey = maximumHp === 30 ? "lg" : "sm"; // 30이면 큰 캐릭터, 그 외(10/20)는 작은 캐릭터
+  const characterSrc = `/characters/${type}/${sizeKey}${isDead ? "_dead" : ""}.svg`;
+  const characterLabel = CHARACTER_LABEL[type];
+  const supportText = commentTone ? COMMENT_TONE_MAP[commentTone] : "무조건 위로해주기";
 
   const displayLikes = likeCount ?? 4;
   const displayComments = commentCount ?? 4;
@@ -189,15 +188,15 @@ export default function CharacterCard({
       <div className="flex w-full items-end gap-5.5 px-4.5">
         <div className="relative flex-none">
           <Image
-            src={character.src}
-            alt={`${character.label} 캐릭터`}
+            src={characterSrc}
+            alt={`${characterLabel} 캐릭터`}
             width={88}
             height={96}
             priority={false}
             className="flex-none"
           />
 
-          {isAttacking && (
+          {isAttacking && !isDead && (
             <Image
               src="/characters/attack.svg"
               alt="공격 모션"
@@ -210,7 +209,7 @@ export default function CharacterCard({
         </div>
 
         <div className="flex w-full flex-col gap-2.5">
-          <div className={characterLabelStyle({ character: type })}>{character.label} 몬스터</div>
+          <div className={characterLabelStyle({ character: type })}>{characterLabel} 몬스터</div>
 
           <div className="mb-1">
             <div className="text-detail-13m text-gray-60 mb-1.5 flex items-center justify-between">
@@ -244,7 +243,7 @@ export default function CharacterCard({
             className="text-detail-13m text-gray-30 flex items-center gap-0.5 rounded-sm bg-black/30 px-2 py-1.25"
           >
             <Comment className="h-4 w-4 flex-none" />
-            <span>무조건 위로해주기</span>
+            <span>{supportText}</span>
             <span>·</span>
             <span>{displayComments}</span>
           </button>
