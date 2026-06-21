@@ -6,9 +6,15 @@ interface CommentInputProps {
   placeholderType: string;
   onSubmit: (content: string) => Promise<void>;
   isSubmitting?: boolean;
+  disabled?: boolean;
 }
 
-export default function CommentInput({ placeholderType, onSubmit, isSubmitting = false }: CommentInputProps) {
+export default function CommentInput({
+  placeholderType,
+  onSubmit,
+  isSubmitting = false,
+  disabled = false,
+}: CommentInputProps) {
   const [commentText, setCommentText] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -59,10 +65,14 @@ export default function CommentInput({ placeholderType, onSubmit, isSubmitting =
         ref={textareaRef}
         value={commentText}
         onChange={handleTextareaChange}
-        onFocus={() => setIsFocused(true)}
-        placeholder={`${placeholderType}...`}
+        onFocus={() => {
+          if (disabled) return;
+          setIsFocused(true);
+        }}
+        disabled={disabled}
+        placeholder={disabled ? "로그인이 필요한 기능입니다" : `${placeholderType}...`}
         rows={1}
-        className={`text-body-15m max-h-[115px] resize-none overflow-y-auto bg-transparent text-white outline-none placeholder:text-gray-50 ${
+        className={`text-body-15m max-h-[115px] resize-none overflow-y-auto bg-transparent text-white outline-none placeholder:text-gray-50 disabled:cursor-not-allowed ${
           isFocused ? "w-full" : "w-[calc(100%-60px)]"
         }`}
       />
