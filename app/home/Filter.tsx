@@ -10,18 +10,55 @@ import useScrollLock from "@/hooks/useScrollLock";
 import { useState } from "react";
 import { FloatingPortal } from "@floating-ui/react";
 import TopBar from "@/components/TopBar";
+import type { JobRole, CareerYear } from "@/services/types";
 
-const filterOptions = {
-  job: ["전체", "기획", "디자인", "개발", "마케팅", "영업", "인사", "총무", "생산", "회계"],
-  career: ["전체", "신입", "1년차", "2년차", "3년차", "4년차", "5년차", "6년차", "7년차 이상"],
-};
+// 한글 라벨 ↔ 백엔드 enum 매핑 ("전체"는 필터 해제이므로 제외)
+const jobOptions: { label: string; value: JobRole }[] = [
+  { label: "기획", value: "PLANNING" },
+  { label: "디자인", value: "DESIGN" },
+  { label: "개발", value: "DEVELOPMENT" },
+  { label: "마케팅", value: "MARKETING" },
+  { label: "영업", value: "SALES" },
+  { label: "인사", value: "HR" },
+  { label: "총무", value: "GENERAL_AFFAIRS" },
+  { label: "생산", value: "PRODUCTION" },
+  { label: "회계", value: "ACCOUNTING" },
+];
+
+const careerOptions: { label: string; value: CareerYear }[] = [
+  { label: "신입", value: "NEWCOMER" },
+  { label: "1년차", value: "YEAR_1" },
+  { label: "2년차", value: "YEAR_2" },
+  { label: "3년차", value: "YEAR_3" },
+  { label: "4년차", value: "YEAR_4" },
+  { label: "5년차", value: "YEAR_5" },
+  { label: "6년차", value: "YEAR_6" },
+  { label: "7년차 이상", value: "YEAR_7_PLUS" },
+];
 
 const sortOptions = ["최신순", "인기순"];
 
-export default function Filter() {
+interface FilterProps {
+  jobRole: JobRole[];
+  careerYear: CareerYear[];
+  onApply: (next: { jobRole: JobRole[]; careerYear: CareerYear[] }) => void;
+}
+
+export default function Filter({ jobRole, careerYear, onApply }: FilterProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<keyof typeof filterOptions>("job");
+  const [selectedFilter, setSelectedFilter] = useState<"job" | "career">("job");
   const [sortOption, setSortOption] = useState(sortOptions[0]);
+
+  // 모달 안에서의 임시(드래프트) 선택값. 모달 열 때 커밋된 값으로 초기화.
+  const [jobDraft, setJobDraft] = useState<JobRole[]>(jobRole);
+  const [careerDraft, setCareerDraft] = useState<CareerYear[]>(careerYear);
+
+  function openFilter(tab: "job" | "career") {
+    setJobDraft(jobRole);
+    setCareerDraft(careerYear);
+    setSelectedFilter(tab);
+    setIsFilterOpen(true);
+  }
 
   useScrollLock(isFilterOpen);
 
@@ -35,9 +72,30 @@ export default function Filter() {
     getFloatingProps,
   } = useFloating();
 
+  function toggleJob(value: JobRole) {
+    setJobDraft((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
+  }
+
+  function toggleCareer(value: CareerYear) {
+    setCareerDraft((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
+  }
+
+  function handleReset() {
+    setJobDraft([]);
+    setCareerDraft([]);
+  }
+
   function handleComplete() {
-    // TODO: 선택된 필터 옵션 데이터를 서버로 전송하는 로직 추가 필요
+    onApply({ jobRole: jobDraft, careerYear: careerDraft });
     setIsFilterOpen(false);
+  }
+
+  // 선택된 값들을 "기획", "기획 외 1개" 형태의 버튼 라벨로 변환 (옵션 순서 기준)
+  function buildLabel<T extends string>(selected: T[], options: { label: string; value: T }[], fallback: string) {
+    const labels = options.filter((o) => selected.includes(o.value)).map((o) => o.label);
+    if (labels.length === 0) return fallback;
+    if (labels.length === 1) return labels[0];
+    return `${labels[0]} 외 ${labels.length - 1}개`;
   }
 
   return (
@@ -47,18 +105,18 @@ export default function Filter() {
           <button
             type="button"
             className="text-body-14sb bg-gray-90 flex items-center gap-1.5 rounded-sm py-1.5 pr-2 pl-3"
-            onClick={() => setIsFilterOpen(true)}
+            onClick={() => openFilter("job")}
           >
-            <p>직군</p>
+            <p>{buildLabel(jobRole, jobOptions, "직군")}</p>
             <ArrowDown className="h-4 w-4 flex-none text-gray-50" />
           </button>
 
           <button
             type="button"
             className="text-body-14sb bg-gray-90 flex items-center gap-1.5 rounded-sm py-1.5 pr-2 pl-3"
-            onClick={() => setIsFilterOpen(true)}
+            onClick={() => openFilter("career")}
           >
-            <p>경력</p>
+            <p>{buildLabel(careerYear, careerOptions, "경력")}</p>
             <ArrowDown className="h-4 w-4 flex-none text-gray-50" />
           </button>
         </div>
@@ -146,22 +204,47 @@ export default function Filter() {
 
               <div className="grow overflow-y-auto">
                 <ul className="flex flex-col gap-5 p-6">
-                  {filterOptions[selectedFilter].map((option) => {
-                    const isSelected = option === "전체" ? true : false; // TODO: 선택된 옵션 상태 관리 로직 추가 필요
+                  {(() => {
+                    const isJob = selectedFilter === "job";
+                    const options = isJob ? jobOptions : careerOptions;
+                    const draft = isJob ? jobDraft : careerDraft;
+                    const isAllSelected = draft.length === 0;
 
                     return (
-                      <li key={option}>
-                        <button
-                          type="button"
-                          className="text-head-18m text-gray-60 aria-pressed:text-blue-20 aria-pressed:text-head-18b flex items-center gap-3"
-                          aria-pressed={isSelected}
-                        >
-                          <p>{option}</p>
-                          {isSelected && <Check className="text-blue-20 h-6.5 w-6.5 flex-none" />}
-                        </button>
-                      </li>
+                      <>
+                        <li>
+                          <button
+                            type="button"
+                            className="text-head-18m text-gray-60 aria-pressed:text-blue-20 aria-pressed:text-head-18b flex items-center gap-3"
+                            aria-pressed={isAllSelected}
+                            onClick={() => (isJob ? setJobDraft([]) : setCareerDraft([]))}
+                          >
+                            <p>전체</p>
+                            {isAllSelected && <Check className="text-blue-20 h-6.5 w-6.5 flex-none" />}
+                          </button>
+                        </li>
+                        {options.map((option) => {
+                          const isSelected = (draft as string[]).includes(option.value);
+
+                          return (
+                            <li key={option.value}>
+                              <button
+                                type="button"
+                                className="text-head-18m text-gray-60 aria-pressed:text-blue-20 aria-pressed:text-head-18b flex items-center gap-3"
+                                aria-pressed={isSelected}
+                                onClick={() =>
+                                  isJob ? toggleJob(option.value as JobRole) : toggleCareer(option.value as CareerYear)
+                                }
+                              >
+                                <p>{option.label}</p>
+                                {isSelected && <Check className="text-blue-20 h-6.5 w-6.5 flex-none" />}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </>
                     );
-                  })}
+                  })()}
                 </ul>
               </div>
 
@@ -169,6 +252,7 @@ export default function Filter() {
                 <button
                   type="button"
                   className="border-gray-80 text-head-18m flex h-13 flex-none items-center gap-2 rounded-xl border px-4.5 text-gray-50"
+                  onClick={handleReset}
                 >
                   <Reset className="h-5 w-5" />
                   <p>초기화</p>
