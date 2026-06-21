@@ -149,6 +149,7 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
     );
   }
 
+  const isLoggedIn = _hasHydrated && Boolean(user);
   const isMyPost = _hasHydrated && user ? post.author.nickname === user.nickname : false;
 
   const comments = post.comments || [];
@@ -286,6 +287,7 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
           await submitComment(content);
         }}
         isSubmitting={isSubmitting}
+        disabled={!isLoggedIn}
       />
 
       <Modal
