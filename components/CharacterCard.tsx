@@ -187,7 +187,7 @@ export default function CharacterCard({
       )}
 
       <div className="flex w-full items-end gap-5.5 px-4.5">
-        <div className="relative">
+        <div className="relative flex-none">
           <Image
             src={character.src}
             alt={`${character.label} 캐릭터`}
