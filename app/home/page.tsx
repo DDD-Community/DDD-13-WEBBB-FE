@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Filter from "./Filter";
 import MainTopBar from "@/components/MainTopBar";
 import WriteButton from "./WriteButton";
 import CharacterCard from "@/components/CharacterCard";
 import { getPosts } from "@/services/endpoints/post";
-import type { PostListItem } from "@/services/endpoints/post";
+import { postKeys } from "@/services/query-keys";
+import type { JobRole, CareerYear } from "@/services/types";
 
 const EMOTION_TYPE_MAP: Record<string, "anxiety" | "lethargy" | "loneliness" | "self_deprecation" | "irritation"> = {
   ANXIETY: "anxiety",
@@ -17,32 +19,26 @@ const EMOTION_TYPE_MAP: Record<string, "anxiety" | "lethargy" | "loneliness" | "
 };
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<PostListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [jobRole, setJobRole] = useState<JobRole[]>([]);
+  const [careerYear, setCareerYear] = useState<CareerYear[]>([]);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await getPosts({ size: 20 });
-        if (response && response.posts) {
-          setPosts(response.posts);
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error("게시글 목록 로딩 실패:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, []);
+  const { data, isLoading } = useQuery({
+    queryKey: postKeys.list({ jobRole, careerYear }),
+    queryFn: () => getPosts({ size: 20, jobRole, careerYear }),
+  });
+  const posts = data?.posts ?? [];
 
   return (
     <>
       <MainTopBar />
-      <Filter />
+      <Filter
+        jobRole={jobRole}
+        careerYear={careerYear}
+        onApply={(next) => {
+          setJobRole(next.jobRole);
+          setCareerYear(next.careerYear);
+        }}
+      />
 
       <main className="flex-1 pb-10">
         {isLoading ? (
