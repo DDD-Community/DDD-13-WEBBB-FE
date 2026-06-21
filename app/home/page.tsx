@@ -24,7 +24,7 @@ export default function HomePage() {
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: postKeys.list({ jobRole, careerYear }),
-    queryFn: ({ pageParam }) => getPosts({ size: 5, cursor: pageParam, jobRole, careerYear }),
+    queryFn: ({ pageParam }) => getPosts({ size: 10, cursor: pageParam, jobRole, careerYear }),
     initialPageParam: null as number | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
