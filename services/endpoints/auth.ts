@@ -42,3 +42,13 @@ export const checkEmail = (email: string) =>
   http.get<{ available: boolean }>(`/api/auth/email/check?email=${encodeURIComponent(email)}`);
 
 export const logout = () => http.post<null>("/api/auth/logout");
+
+// OAuth(리다이렉트 방식) ─────────────────────────────────────────────
+
+export type OAuthProvider = "google" | "kakao" | "naver";
+
+/** 소셜 버튼 클릭 시 이동할 OAuth 시작 URL */
+export const oauthAuthorizeUrl = (provider: OAuthProvider) => `/api/auth/oauth/${provider}/authorize`;
+
+/** 콜백에서 받은 1회용 code 를 JWT 로 교환하고 사용자 정보를 받음 (토큰은 httpOnly 쿠키로 저장됨) */
+export const exchangeOAuthCode = (code: string) => http.post<AuthUser>("/api/auth/oauth/exchange", { code });
