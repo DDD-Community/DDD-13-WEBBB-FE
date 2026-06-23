@@ -20,6 +20,9 @@ const STRIP_RESPONSE_HEADERS = new Set([
   "content-length",
 ]);
 
+// 바디를 가질 수 없는 상태 코드 (NextResponse 생성자가 바디가 있으면 throw → 500)
+const NULL_BODY_STATUS = new Set([204, 205, 304]);
+
 type Ctx = { params: Promise<{ path: string[] }> };
 
 async function handle(req: NextRequest, ctx: Ctx) {
@@ -67,7 +70,8 @@ async function handle(req: NextRequest, ctx: Ctx) {
     if (!STRIP_RESPONSE_HEADERS.has(key.toLowerCase())) headers.set(key, value);
   });
 
-  const payload = await res.arrayBuffer();
+  // 204/205/304 는 바디를 가질 수 없으므로 null 로 전달 (빈 ArrayBuffer 도 throw 발생)
+  const payload = NULL_BODY_STATUS.has(res.status) ? null : await res.arrayBuffer();
   return new NextResponse(payload, { status: res.status, headers });
 }
 
