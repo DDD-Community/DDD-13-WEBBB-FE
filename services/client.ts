@@ -46,15 +46,15 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new ApiError(401, "세션이 만료되었습니다. 다시 로그인해주세요.");
   }
 
-  // 204 No Content 등 바디 없는 응답
-  if (res.status === 204) return undefined as T;
+  // 204 No Content 등 바디 없는 응답 (status 코드와 무관하게 안전 처리)
+  const text = await res.text();
+  const json = text ? (JSON.parse(text) as ApiResponse<T>) : null;
 
-  const json = (await res.json()) as ApiResponse<T>;
-  if (!res.ok || !json.success) {
-    throw new ApiError(res.status, json.message ?? "요청에 실패했습니다.", json.errors);
+  if (!res.ok || (json && !json.success)) {
+    throw new ApiError(res.status, json?.message ?? "요청에 실패했습니다.", json?.errors ?? null);
   }
 
-  return json.data;
+  return (json ? json.data : undefined) as T;
 }
 
 /** 도메인 endpoints 에서 사용하는 편의 메서드. body 가 있는 메서드는 (path, body) 시그니처. */
