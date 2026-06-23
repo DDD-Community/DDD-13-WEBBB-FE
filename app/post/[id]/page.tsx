@@ -114,6 +114,20 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
     },
   });
 
+  const { mutate: removePost } = useMutation({
+    mutationFn: () => deletePost(postId),
+    onSuccess: () => {
+      setIsModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      router.replace("/home");
+    },
+    onError: (error) => {
+      // eslint-disable-next-line no-console
+      console.error("게시글 삭제 실패:", error);
+      alert("게시글 삭제 중 오류가 발생했습니다.");
+    },
+  });
+
   const triggerAttack = () => {
     if (attackTimerRef.current) clearTimeout(attackTimerRef.current);
     setIsAttacking(true);
@@ -162,19 +176,6 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
     e.stopPropagation();
     setIsMenuOpen(false);
     setIsModalOpen(true);
-  };
-
-  const handleConfirmDelete = async () => {
-    try {
-      await deletePost(postId);
-
-      setIsModalOpen(false);
-      router.back();
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("게시글 삭제 실패:", error);
-      alert("게시글 삭제 중 오류가 발생했습니다.");
-    }
   };
 
   return (
@@ -293,11 +294,11 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onConfirm={handleConfirmDelete}
+        onConfirm={() => removePost()}
         title="게시글을 삭제하시겠어요?"
         confirmText="확인"
         cancelText="취소"
-        confirmVariant="blue"
+        confirmVariant="red"
       />
     </div>
   );
