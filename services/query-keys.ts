@@ -5,3 +5,13 @@ export const postKeys = {
   details: () => [...postKeys.all, "detail"] as const,
   detail: (postId: number) => [...postKeys.details(), postId] as const,
 };
+
+export const userKeys = {
+  all: ["users"] as const,
+  me: () => [...userKeys.all, "me"] as const,
+};
+
+export const myPageKeys = {
+  all: ["my-page"] as const,
+  monsterStats: () => [...myPageKeys.all, "monster-stats"] as const,
+};
