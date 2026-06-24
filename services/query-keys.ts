@@ -13,5 +13,9 @@ export const userKeys = {
 
 export const myPageKeys = {
   all: ["my-page"] as const,
+  activities: () => [...myPageKeys.all, "activities"] as const,
+  posts: () => [...myPageKeys.activities(), "posts"] as const,
+  comments: () => [...myPageKeys.activities(), "comments"] as const,
+  likedPosts: () => [...myPageKeys.activities(), "liked-posts"] as const,
   monsterStats: () => [...myPageKeys.all, "monster-stats"] as const,
 };

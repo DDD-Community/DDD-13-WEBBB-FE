@@ -103,7 +103,7 @@ export default function CharacterCard({
 
   const isDead = currentHp <= 0;
   const sizeKey = maximumHp === 30 ? "lg" : "sm"; // 30이면 큰 캐릭터, 그 외(10/20)는 작은 캐릭터
-  const characterSrc = `/characters/${type}/${sizeKey}${isDead ? "_dead" : ""}.svg`;
+  const characterSrc = `/characters/${type.toLowerCase()}/${sizeKey}${isDead ? "_dead" : ""}.svg`;
   const characterLabel = CHARACTER_LABEL[type];
   const supportText = commentTone ? COMMENT_TONE[commentTone] : "무조건 위로해주기";
 

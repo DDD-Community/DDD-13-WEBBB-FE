@@ -49,3 +49,6 @@ export const CAREER_YEAR = {
 
 export const JOB_ROLE_BY_LABEL = invertStringMap(JOB_ROLE);
 export const CAREER_YEAR_BY_LABEL = invertStringMap(CAREER_YEAR);
+
+export type JobRoleLabel = keyof typeof JOB_ROLE_BY_LABEL;
+export type CareerYearLabel = keyof typeof CAREER_YEAR_BY_LABEL;
