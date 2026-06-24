@@ -17,6 +17,11 @@ export interface UserProfileUpdateBody {
   careerLevel?: CareerYear;
 }
 
+export const getMe = () => http.get<UserMeResponse>("/api/users/me");
+
+export const updateMyProfile = (body: UserProfileUpdateBody) =>
+  http.patch<UserMeResponse>("/api/users/me/profile", body);
+
 export const checkNickname = (value: string) =>
   http.get<{ available: boolean }>(`/api/users/nickname/check?value=${encodeURIComponent(value)}`);
 

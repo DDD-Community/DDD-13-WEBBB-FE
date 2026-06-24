@@ -10,7 +10,7 @@ export default function PostsTopBar() {
   return (
     <TopBar
       leftContent={
-        <button type="button" aria-label="이전 페이지로 돌아가기" onClick={() => router.back()}>
+        <button type="button" aria-label="이전 페이지로 돌아가기" onClick={() => router.push("/my")}>
           <ArrowLeft className="h-6 w-6 flex-none" aria-hidden="true" />
         </button>
       }

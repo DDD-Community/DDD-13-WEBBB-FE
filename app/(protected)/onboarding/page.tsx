@@ -2,7 +2,7 @@
 
 import { ApiError } from "@/services/client";
 import { checkNickname, updateUserById, type UserProfileUpdateBody } from "@/services/endpoints/users";
-import type { CareerYear, JobRole } from "@/services/types";
+import { CAREER_YEAR_BY_LABEL, JOB_ROLE_BY_LABEL } from "@/const/map";
 import X from "@/assets/icons/ic_x.svg";
 import XCircle from "@/assets/icons/ic_x_circle.svg";
 import ArrowLeft from "@/assets/icons/ic_arrow_left.svg";
@@ -33,29 +33,6 @@ const STEP_META: Record<Step, string> = {
   2: "현재 취업 · 이직 준비중인\n직군은 무엇인가요?",
   3: "해당 직군의 경력은\n얼마나 되나요?",
 };
-
-const JOB_TO_API = {
-  기획: "PLANNING",
-  디자인: "DESIGN",
-  개발: "DEVELOPMENT",
-  마케팅: "MARKETING",
-  영업: "SALES",
-  인사: "HR",
-  총무: "GENERAL_AFFAIRS",
-  생산: "PRODUCTION",
-  회계: "ACCOUNTING",
-} as const satisfies Record<(typeof jobSchema.options)[number], JobRole>;
-
-const CAREER_TO_API = {
-  신입: "NEWCOMER",
-  "1년차": "YEAR_1",
-  "2년차": "YEAR_2",
-  "3년차": "YEAR_3",
-  "4년차": "YEAR_4",
-  "5년차": "YEAR_5",
-  "6년차": "YEAR_6",
-  "7년차 이상": "YEAR_7_PLUS",
-} as const satisfies Record<(typeof careerSchema.options)[number], CareerYear>;
 
 export default function Onboarding() {
   const router = useRouter();
@@ -118,8 +95,8 @@ export default function Onboarding() {
 
     submitOnboarding({
       nickname: data.nickname,
-      jobType: JOB_TO_API[data.job],
-      careerLevel: CAREER_TO_API[data.career],
+      jobType: JOB_ROLE_BY_LABEL[data.job],
+      careerLevel: CAREER_YEAR_BY_LABEL[data.career],
     });
   }
 

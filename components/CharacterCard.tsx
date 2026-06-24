@@ -8,6 +8,7 @@ import Comment from "@/assets/icons/ic_comment.svg";
 import type { CareerYear, CommentTone, EmotionType, JobRole } from "@/services/types";
 import CharacterChip from "./CharacterChip";
 import { CAREER_YEAR, CHARACTER_LABEL, COMMENT_TONE, JOB_ROLE } from "@/const/map";
+import { getTimeAgo } from "@/lib/date";
 
 export type CharacterCardProps = {
   profile?: boolean;
@@ -56,22 +57,6 @@ const characterBarStyle: (props: { character: EmotionType }) => string = cva(
   }
 );
 
-function getTimeAgo(dateString?: string) {
-  if (!dateString) return null;
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return "방금 전";
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours}시간 전`;
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) return `${diffInDays}일 전`;
-  return date.toLocaleDateString();
-}
-
 export default function CharacterCard({
   profile = true,
   isAttacking = false,
@@ -103,7 +88,7 @@ export default function CharacterCard({
 
   const isDead = currentHp <= 0;
   const sizeKey = maximumHp === 30 ? "lg" : "sm"; // 30이면 큰 캐릭터, 그 외(10/20)는 작은 캐릭터
-  const characterSrc = `/characters/${type}/${sizeKey}${isDead ? "_dead" : ""}.svg`;
+  const characterSrc = `/characters/${type.toLowerCase()}/${sizeKey}${isDead ? "_dead" : ""}.svg`;
   const characterLabel = CHARACTER_LABEL[type];
   const supportText = commentTone ? COMMENT_TONE[commentTone] : "무조건 위로해주기";
 
