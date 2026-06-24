@@ -24,45 +24,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { getPostDetail, deletePost } from "@/services/endpoints/post";
 import { createComment } from "@/services/endpoints/comment";
 import { postKeys } from "@/services/query-keys";
-
-const JOB_ROLE_MAP: Record<string, string> = {
-  DEVELOPMENT: "개발",
-  PLANNING: "기획",
-  DESIGN: "디자인",
-  MARKETING: "마케팅",
-  SALES: "영업",
-  HR: "인사",
-  GENERAL_AFFAIRS: "총무",
-  PRODUCTION: "생산",
-  ACCOUNTING: "회계",
-  OTHER: "기타",
-};
-
-const CAREER_YEAR_MAP: Record<string, string> = {
-  NEWCOMER: "신입",
-  YEAR_1: "1년차",
-  YEAR_2: "2년차",
-  YEAR_3: "3년차",
-  YEAR_4: "4년차",
-  YEAR_5: "5년차",
-  YEAR_6: "6년차",
-  YEAR_7_PLUS: "7년차 이상",
-};
-
-const EMOTION_TYPE_MAP: Record<string, "anxiety" | "lethargy" | "loneliness" | "self_deprecation" | "irritation"> = {
-  ANXIETY: "anxiety",
-  LETHARGY: "lethargy",
-  LONELINESS: "loneliness",
-  SELF_DEPRECATION: "self_deprecation",
-  IRRITATION: "irritation",
-};
-
-const COMMENT_TONE_MAP: Record<string, string> = {
-  VENT_WITH_ME: "대신 욕해주기",
-  COMFORT_ME: "무조건 위로해주기",
-  WARM_ADVICE: "따뜻한 조언해주기",
-  MAKE_ME_LAUGH: "웃겨주기",
-};
+import { type EmotionType } from "@/services/types";
+import { CAREER_YEAR, COMMENT_TONE, JOB_ROLE } from "@/const/map";
 
 interface PostDetailPageProps {
   params: Promise<{ id: string }>;
@@ -167,10 +130,10 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
   const isMyPost = _hasHydrated && user ? post.author.nickname === user.nickname : false;
 
   const comments = post.comments || [];
-  const cardType = EMOTION_TYPE_MAP[post.emotion.type] || "anxious";
-  const displayJob = post.author.jobRole ? JOB_ROLE_MAP[post.author.jobRole] || "기타" : "개발";
-  const displayCareer = post.author.careerYear ? CAREER_YEAR_MAP[post.author.careerYear] || "기타" : "1년차";
-  const supportText = COMMENT_TONE_MAP[post.commentTone] || "무조건 위로해주기";
+  const cardType = post.emotion.type as EmotionType;
+  const displayJob = post.author.jobRole ? JOB_ROLE[post.author.jobRole] || "기타" : "개발";
+  const displayCareer = post.author.careerYear ? CAREER_YEAR[post.author.careerYear] || "기타" : "1년차";
+  const supportText = COMMENT_TONE[post.commentTone] || "무조건 위로해주기";
 
   const handleDeleteMenuClick = (e: React.MouseEvent) => {
     e.stopPropagation();

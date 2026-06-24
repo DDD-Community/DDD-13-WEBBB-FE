@@ -8,15 +8,7 @@ import WriteButton from "./WriteButton";
 import CharacterCard from "@/components/CharacterCard";
 import { getPosts } from "@/services/endpoints/post";
 import { postKeys } from "@/services/query-keys";
-import type { JobRole, CareerYear } from "@/services/types";
-
-const EMOTION_TYPE_MAP: Record<string, "anxiety" | "lethargy" | "loneliness" | "self_deprecation" | "irritation"> = {
-  ANXIETY: "anxiety",
-  LETHARGY: "lethargy",
-  LONELINESS: "loneliness",
-  SELF_DEPRECATION: "self_deprecation",
-  IRRITATION: "irritation",
-};
+import type { JobRole, CareerYear, EmotionType } from "@/services/types";
 
 export default function HomePage() {
   const [jobRole, setJobRole] = useState<JobRole[]>([]);
@@ -72,7 +64,7 @@ export default function HomePage() {
           <>
             <ul className="flex flex-col gap-4 px-4">
               {posts.map((post) => {
-                const cardType = EMOTION_TYPE_MAP[post.emotionType] || "anxiety";
+                const cardType = post.emotionType as EmotionType;
 
                 return (
                   <li key={post.postId}>
