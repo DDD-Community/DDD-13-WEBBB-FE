@@ -5,18 +5,18 @@ import { cva } from "class-variance-authority";
 import Link from "next/link";
 import Heart from "@/assets/icons/ic_heart.svg";
 import Comment from "@/assets/icons/ic_comment.svg";
-import type { CommentTone } from "@/services/types";
-
-type CharacterType = "anxiety" | "lethargy" | "loneliness" | "self_deprecation" | "irritation";
+import type { CareerYear, CommentTone, EmotionType, JobRole } from "@/services/types";
+import CharacterChip from "./CharacterChip";
+import { CAREER_YEAR, CHARACTER_LABEL, COMMENT_TONE, JOB_ROLE } from "@/const/map";
 
 export type CharacterCardProps = {
   profile?: boolean;
   isAttacking?: boolean;
-  type: CharacterType;
+  type: EmotionType;
   postId?: number;
   authorNickname?: string | null;
-  jobRole?: string | null;
-  careerYear?: string | null;
+  jobRole?: JobRole | null;
+  careerYear?: CareerYear | null;
   createdAt?: string;
   contentPreview?: string;
   hp?: number;
@@ -26,88 +26,35 @@ export type CharacterCardProps = {
   commentTone?: CommentTone;
 };
 
-const CHARACTER_LABEL: Record<CharacterType, string> = {
-  lethargy: "무기력",
-  anxiety: "불안",
-  loneliness: "외로움",
-  self_deprecation: "자기비하",
-  irritation: "짜증",
-};
-
-const COMMENT_TONE_MAP: Record<CommentTone, string> = {
-  VENT_WITH_ME: "대신 욕해주기",
-  COMFORT_ME: "무조건 위로해주기",
-  WARM_ADVICE: "따뜻한 조언해주기",
-  MAKE_ME_LAUGH: "웃겨주기",
-};
-
-const characterCardStyle: (props: { character: CharacterType }) => string = cva(
+const characterCardStyle: (props: { character: EmotionType }) => string = cva(
   "flex flex-col items-center rounded-xl bg-[#1C1C1E] bg-linear-to-b from-transparent from-70% to-100% p-4",
   {
     variants: {
       character: {
-        lethargy: "to-purple-10",
-        anxiety: "to-orange-10",
-        loneliness: "to-blue-10",
-        self_deprecation: "to-green-10",
-        irritation: "to-red-10",
-      },
-    },
-  }
-);
-const characterLabelStyle: (props: { character: CharacterType }) => string = cva(
-  "text-detail-13sb w-fit rounded-sm px-2 py-1",
-  {
-    variants: {
-      character: {
-        lethargy: "bg-purple-10 text-purple-20",
-        anxiety: "bg-orange-10 text-orange-20",
-        loneliness: "bg-blue-10 text-blue-20",
-        self_deprecation: "bg-green-10 text-green-20",
-        irritation: "bg-red-10 text-red-20",
+        LETHARGY: "to-purple-10",
+        ANXIETY: "to-orange-10",
+        LONELINESS: "to-blue-10",
+        SELF_DEPRECATION: "to-green-10",
+        IRRITATION: "to-red-10",
       },
     },
   }
 );
 
-const characterBarStyle: (props: { character: CharacterType }) => string = cva(
+const characterBarStyle: (props: { character: EmotionType }) => string = cva(
   "h-full rounded-full bg-linear-to-r transition-all",
   {
     variants: {
       character: {
-        lethargy: "from-purple-30 to-purple-20",
-        anxiety: "from-orange-30 to-orange-20",
-        loneliness: "from-blue-30 to-blue-20",
-        self_deprecation: "from-green-30 to-green-20",
-        irritation: "from-red-30 to-red-20",
+        LETHARGY: "from-purple-30 to-purple-20",
+        ANXIETY: "from-orange-30 to-orange-20",
+        LONELINESS: "from-blue-30 to-blue-20",
+        SELF_DEPRECATION: "from-green-30 to-green-20",
+        IRRITATION: "from-red-30 to-red-20",
       },
     },
   }
 );
-
-const JOB_ROLE_MAP: Record<string, string> = {
-  DEVELOPMENT: "개발",
-  PLANNING: "기획",
-  DESIGN: "디자인",
-  MARKETING: "마케팅",
-  SALES: "영업",
-  HR: "인사",
-  GENERAL_AFFAIRS: "총무",
-  PRODUCTION: "생산",
-  ACCOUNTING: "회계",
-  OTHER: "기타",
-};
-
-const CAREER_YEAR_MAP: Record<string, string> = {
-  NEWCOMER: "신입",
-  YEAR_1: "1년차",
-  YEAR_2: "2년차",
-  YEAR_3: "3년차",
-  YEAR_4: "4년차",
-  YEAR_5: "5년차",
-  YEAR_6: "6년차",
-  YEAR_7_PLUS: "7년차 이상",
-};
 
 function getTimeAgo(dateString?: string) {
   if (!dateString) return null;
@@ -143,8 +90,8 @@ export default function CharacterCard({
 }: CharacterCardProps) {
   const linkHref = postId ? `/post/${postId}` : undefined;
   const displayNickname = authorNickname || "닉네임";
-  const displayJob = jobRole ? JOB_ROLE_MAP[jobRole] || "기타" : "개발";
-  const displayCareer = careerYear ? CAREER_YEAR_MAP[careerYear] || "기타" : "1년차";
+  const displayJob = jobRole ? JOB_ROLE[jobRole] || "기타" : "개발";
+  const displayCareer = careerYear ? CAREER_YEAR[careerYear] || "기타" : "1년차";
   const displayTimeAgo = getTimeAgo(createdAt) || "1시간 전";
   const displayContent =
     contentPreview ||
@@ -158,7 +105,7 @@ export default function CharacterCard({
   const sizeKey = maximumHp === 30 ? "lg" : "sm"; // 30이면 큰 캐릭터, 그 외(10/20)는 작은 캐릭터
   const characterSrc = `/characters/${type}/${sizeKey}${isDead ? "_dead" : ""}.svg`;
   const characterLabel = CHARACTER_LABEL[type];
-  const supportText = commentTone ? COMMENT_TONE_MAP[commentTone] : "무조건 위로해주기";
+  const supportText = commentTone ? COMMENT_TONE[commentTone] : "무조건 위로해주기";
 
   const displayLikes = likeCount ?? 4;
   const displayComments = commentCount ?? 4;
@@ -209,7 +156,7 @@ export default function CharacterCard({
         </div>
 
         <div className="flex w-full flex-col gap-2.5">
-          <div className={characterLabelStyle({ character: type })}>{characterLabel} 몬스터</div>
+          <CharacterChip type={type} />
 
           <div className="mb-1">
             <div className="text-detail-13m text-gray-60 mb-1.5 flex items-center justify-between">

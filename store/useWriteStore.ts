@@ -1,10 +1,11 @@
+import { type CommentTone } from "@/services/types";
 import { create } from "zustand";
 
 interface WriteState {
   content: string;
   setContent: (content: string) => void;
-  selectedOption: string;
-  setSelectedOption: (option: string) => void;
+  selectedOption: CommentTone | "";
+  setSelectedOption: (option: CommentTone | "") => void;
 }
 
 export const useWriteStore = create<WriteState>((set) => ({

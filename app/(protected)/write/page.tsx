@@ -11,15 +11,7 @@ import Modal from "@/components/modal";
 import { createPost } from "@/services/endpoints/post";
 import { postKeys } from "@/services/query-keys";
 import type { CommentTone } from "@/services/types";
-
-export const COMMENT_OPTIONS = ["대신 욕해주기", "무조건 위로해주기", "따뜻한 조언해주기", "웃겨주기"];
-
-const COMMENT_TONE_MAP: Record<string, CommentTone> = {
-  "대신 욕해주기": "VENT_WITH_ME",
-  "무조건 위로해주기": "COMFORT_ME",
-  "따뜻한 조언해주기": "WARM_ADVICE",
-  웃겨주기: "MAKE_ME_LAUGH",
-};
+import { COMMENT_TONE } from "@/const/map";
 
 export default function WritePage() {
   const router = useRouter();
@@ -34,12 +26,15 @@ export default function WritePage() {
     mutationFn: () =>
       createPost({
         content: content.trim(),
-        commentTone: COMMENT_TONE_MAP[selectedOption],
+        commentTone: selectedOption as CommentTone,
       }),
     onSuccess: (post) => {
       // 상세 쿼리 캐시를 미리 심어 이동 시 로딩 없이 즉시 렌더되게 함
       queryClient.setQueryData(postKeys.detail(post.postId), post);
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+
+      setContent("");
+      setSelectedOption("");
 
       router.replace(`/post/${post.postId}`);
     },
@@ -110,13 +105,14 @@ export default function WritePage() {
           <h2 className="text-body-16sb mt-[44px] mb-4 leading-[150%] tracking-[-0.32px] text-white">댓글옵션 선택</h2>
 
           <div className="grid grid-cols-2 gap-x-[10px] gap-y-3">
-            {COMMENT_OPTIONS.map((option) => {
-              const isActive = selectedOption === option;
+            {Object.entries(COMMENT_TONE).map(([key, option]) => {
+              const isActive = selectedOption === key;
+
               return (
                 <button
-                  key={option}
+                  key={key}
                   type="button"
-                  onClick={() => !isLoading && setSelectedOption(option)}
+                  onClick={() => !isLoading && setSelectedOption(key as CommentTone)}
                   disabled={isLoading}
                   className={`flex h-[44px] w-full items-center justify-center gap-[10px] rounded-[12px] px-10 py-3 transition-colors duration-200 ${
                     isActive ? "bg-blue-20 text-body-14sb text-black" : "bg-gray-90 text-gray-20 text-body-14m"
