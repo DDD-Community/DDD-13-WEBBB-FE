@@ -8,6 +8,7 @@ import Comment from "@/assets/icons/ic_comment.svg";
 import type { CareerYear, CommentTone, EmotionType, JobRole } from "@/services/types";
 import CharacterChip from "./CharacterChip";
 import { CAREER_YEAR, CHARACTER_LABEL, COMMENT_TONE, JOB_ROLE } from "@/const/map";
+import { getTimeAgo } from "@/lib/date";
 
 export type CharacterCardProps = {
   profile?: boolean;
@@ -55,22 +56,6 @@ const characterBarStyle: (props: { character: EmotionType }) => string = cva(
     },
   }
 );
-
-function getTimeAgo(dateString?: string) {
-  if (!dateString) return null;
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) return "방금 전";
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours}시간 전`;
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) return `${diffInDays}일 전`;
-  return date.toLocaleDateString();
-}
 
 export default function CharacterCard({
   profile = true,

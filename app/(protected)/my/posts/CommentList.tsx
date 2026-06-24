@@ -2,6 +2,7 @@
 
 import Heart from "@/assets/icons/ic_heart.svg";
 import useInfiniteScroll from "@/hooks/useInfiniteScroll";
+import { getTimeAgo } from "@/lib/date";
 import { getMyComments } from "@/services/endpoints/mypage";
 import { myPageKeys } from "@/services/query-keys";
 import { useInfiniteQuery } from "@tanstack/react-query";
@@ -39,8 +40,8 @@ export default function CommentList() {
                 <p className="text-body-15m whitespace-pre-wrap">{comment.content}</p>
 
                 <div className="mt-3 flex gap-4">
-                  <time dateTime="" className="text-detail-12m text-gray-60">
-                    1분 전
+                  <time dateTime={comment.createdAt} className="text-detail-12m text-gray-60">
+                    {getTimeAgo(comment.createdAt) ?? "방금 전"}
                   </time>
                   <Heart className="fill-red-20 text-red-20 h-4 w-4" />
                 </div>
