@@ -1,5 +1,13 @@
 import { type CareerYear, type JobRole, type CommentTone, type EmotionType } from "@/services/types";
 
+type InvertedStringMap<T extends Record<string, string>> = {
+  [Key in keyof T as T[Key]]: Key;
+};
+
+function invertStringMap<const T extends Record<string, string>>(map: T): InvertedStringMap<T> {
+  return Object.fromEntries(Object.entries(map).map(([key, value]) => [value, key])) as InvertedStringMap<T>;
+}
+
 export const CHARACTER_LABEL: Record<EmotionType, string> = {
   LETHARGY: "무기력",
   ANXIETY: "불안",
@@ -15,7 +23,7 @@ export const COMMENT_TONE: Record<CommentTone, string> = {
   MAKE_ME_LAUGH: "웃겨주기",
 };
 
-export const JOB_ROLE: Record<JobRole, string> = {
+export const JOB_ROLE = {
   DEVELOPMENT: "개발",
   PLANNING: "기획",
   DESIGN: "디자인",
@@ -26,9 +34,9 @@ export const JOB_ROLE: Record<JobRole, string> = {
   PRODUCTION: "생산",
   ACCOUNTING: "회계",
   OTHER: "기타",
-};
+} as const satisfies Record<JobRole, string>;
 
-export const CAREER_YEAR: Record<CareerYear, string> = {
+export const CAREER_YEAR = {
   NEWCOMER: "신입",
   YEAR_1: "1년차",
   YEAR_2: "2년차",
@@ -37,4 +45,7 @@ export const CAREER_YEAR: Record<CareerYear, string> = {
   YEAR_5: "5년차",
   YEAR_6: "6년차",
   YEAR_7_PLUS: "7년차 이상",
-};
+} as const satisfies Record<CareerYear, string>;
+
+export const JOB_ROLE_BY_LABEL = invertStringMap(JOB_ROLE);
+export const CAREER_YEAR_BY_LABEL = invertStringMap(CAREER_YEAR);
