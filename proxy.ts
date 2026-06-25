@@ -8,6 +8,16 @@ import { REFRESH_TOKEN_COOKIE } from "@/lib/cookieNames";
  */
 export function proxy(request: NextRequest) {
   const hasSession = request.cookies.has(REFRESH_TOKEN_COOKIE);
+  const isRootPath = request.nextUrl.pathname === "/";
+
+  if (isRootPath) {
+    if (hasSession) {
+      const homeUrl = new URL("/home", request.url);
+      return NextResponse.redirect(homeUrl);
+    }
+
+    return NextResponse.next();
+  }
 
   if (!hasSession) {
     const loginUrl = new URL("/login", request.url);
@@ -18,5 +28,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/write/:path*", "/onboarding/:path*", "/my/:path*", "/settings/:path*"],
+  matcher: ["/", "/write/:path*", "/onboarding/:path*", "/my/:path*", "/settings/:path*"],
 };
