@@ -50,6 +50,7 @@ export default function LikedPostList() {
                 hp={post.currentHp}
                 maxHp={post.maxHp}
                 likeCount={post.likeCount}
+                likedByMe={true}
                 commentCount={post.commentCount}
                 commentTone={post.commentTone}
               />

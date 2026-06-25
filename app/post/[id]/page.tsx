@@ -21,9 +21,9 @@ import { FloatingPortal } from "@floating-ui/react";
 
 import { useAuthStore } from "@/store/useAuthStore";
 
-import { getPostDetail, deletePost } from "@/services/endpoints/post";
+import { getPostDetail, deletePost, type PostDetail, type PostLikeResponse } from "@/services/endpoints/post";
 import { createComment } from "@/services/endpoints/comment";
-import { postKeys } from "@/services/query-keys";
+import { myPageKeys, postKeys } from "@/services/query-keys";
 import { type EmotionType } from "@/services/types";
 import { CAREER_YEAR, COMMENT_TONE, JOB_ROLE } from "@/const/map";
 
@@ -141,6 +141,29 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
     setIsModalOpen(true);
   };
 
+  const handleLikeSuccess = (response: PostLikeResponse, nextIsLiked: boolean) => {
+    queryClient.setQueryData<PostDetail>(postKeys.detail(postId), (current) => {
+      if (!current) return current;
+
+      return {
+        ...current,
+        likeCount: response.likeCount,
+        likedByMe: nextIsLiked,
+        monster: {
+          ...current.monster,
+          hp: response.monster.hp,
+          maxHp: response.monster.maxHp,
+          status: response.monster.status,
+        },
+      };
+    });
+    void queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+    void queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) });
+    void queryClient.invalidateQueries({ queryKey: myPageKeys.likedPosts() });
+
+    if (nextIsLiked) triggerAttack();
+  };
+
   return (
     <div className="min-h-screen bg-black pb-[120px]">
       <TopBar
@@ -216,7 +239,12 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
         </div>
 
         <div className="mt-5 px-4">
-          <LikeButton initialLikeCount={post.likeCount} />
+          <LikeButton
+            postId={postId}
+            initialLikeCount={post.likeCount}
+            initialIsLiked={post.likedByMe}
+            onSuccess={handleLikeSuccess}
+          />
         </div>
 
         <div className="bg-gray-90 mt-5 h-[1px] w-full" />

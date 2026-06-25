@@ -1,26 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import Heart from "@/assets/icons/ic_heart.svg";
+import { likePost, unlikePost, type PostLikeResponse } from "@/services/endpoints/post";
 
 type LikeButtonProps = {
+  postId: number;
   initialLikeCount: number;
   initialIsLiked?: boolean;
+  onSuccess?: (response: PostLikeResponse, isLiked: boolean) => void;
 };
 
-export default function LikeButton({ initialLikeCount, initialIsLiked = false }: LikeButtonProps) {
-  const [isLiked, setIsLiked] = useState(initialIsLiked);
-  const [likeCount, setLikeCount] = useState(initialLikeCount);
+type LocalLikeState = {
+  postId: number;
+  isLiked: boolean;
+  likeCount: number;
+};
 
-  const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+export default function LikeButton({ postId, initialLikeCount, initialIsLiked = false, onSuccess }: LikeButtonProps) {
+  const [localLikeState, setLocalLikeState] = useState<LocalLikeState | null>(null);
+  const [pendingPostId, setPendingPostId] = useState<number | null>(null);
+  const activeLikeState = localLikeState?.postId === postId ? localLikeState : null;
+  const isLiked = activeLikeState?.isLiked ?? initialIsLiked;
+  const likeCount = activeLikeState?.likeCount ?? initialLikeCount;
+  const isPending = pendingPostId === postId;
+
+  const handleLikeClick = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
-    if (isLiked) {
-      setIsLiked(false);
-      setLikeCount((prev) => prev - 1);
-    } else {
-      setIsLiked(true);
-      setLikeCount((prev) => prev + 1);
+    if (isPending) return;
+
+    const previousState = activeLikeState;
+    const nextIsLiked = !isLiked;
+
+    setPendingPostId(postId);
+    setLocalLikeState({
+      postId,
+      isLiked: nextIsLiked,
+      likeCount: Math.max(0, likeCount + (nextIsLiked ? 1 : -1)),
+    });
+
+    try {
+      const response = nextIsLiked ? await likePost(postId) : await unlikePost(postId);
+
+      setLocalLikeState({
+        postId,
+        isLiked: nextIsLiked,
+        likeCount: response.likeCount,
+      });
+      onSuccess?.(response, nextIsLiked);
+    } catch (error) {
+      setLocalLikeState(previousState);
+      // eslint-disable-next-line no-console
+      console.error("게시글 좋아요 처리 실패:", error);
+    } finally {
+      setPendingPostId(null);
     }
   };
 
@@ -28,6 +62,7 @@ export default function LikeButton({ initialLikeCount, initialIsLiked = false }:
     <button
       type="button"
       onClick={handleLikeClick}
+      disabled={isPending}
       className="bg-gray-90 text-gray-30 text-detail-13m flex items-center justify-center gap-0.5 rounded-[4px] px-2 py-1.25 transition-colors"
     >
       <Heart
