@@ -10,7 +10,9 @@ import Comment from "@/assets/icons/ic_comment.svg";
 import type { CareerYear, CommentTone, EmotionType, JobRole } from "@/services/types";
 import { likePost, unlikePost } from "@/services/endpoints/post";
 import { myPageKeys, postKeys } from "@/services/query-keys";
+import { useAuthStore } from "@/store/useAuthStore";
 import CharacterChip from "./CharacterChip";
+import LoginRequiredModal from "./LoginRequiredModal";
 import { CAREER_YEAR, CHARACTER_LABEL, COMMENT_TONE, JOB_ROLE } from "@/const/map";
 import { getTimeAgo } from "@/lib/date";
 
@@ -88,11 +90,14 @@ export default function CharacterCard({
   commentTone,
 }: CharacterCardProps) {
   const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
+  const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const likeAttackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [characterSizeKey] = useState<"lg" | "sm">(() => ((maxHp ?? 30) === 30 ? "lg" : "sm"));
   const [localLikeState, setLocalLikeState] = useState<LocalLikeState | null>(null);
   const [pendingPostId, setPendingPostId] = useState<number | null>(null);
   const [isLikeAttacking, setIsLikeAttacking] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const linkHref = postId ? `/post/${postId}` : undefined;
   const displayNickname = authorNickname || "닉네임";
@@ -108,6 +113,7 @@ export default function CharacterCard({
   const currentHp = activeLikeState?.hp ?? hp ?? 20;
   const maximumHp = activeLikeState?.maxHp ?? maxHp ?? 30;
   const isLikePending = pendingPostId === postId;
+  const isLoggedIn = hasHydrated && Boolean(user);
 
   const hpPercent = maximumHp > 0 ? (currentHp / maximumHp) * 100 : 0;
 
@@ -135,6 +141,11 @@ export default function CharacterCard({
     event.stopPropagation();
 
     if (!postId || isLikePending) return;
+
+    if (!isLoggedIn) {
+      setIsLoginModalOpen(true);
+      return;
+    }
 
     const previousIsLiked = isLiked;
     const previousLikeCount = currentLikeCount;
@@ -275,6 +286,8 @@ export default function CharacterCard({
       ) : (
         <div className={characterCardStyle({ character: type })}>{content}</div>
       )}
+
+      <LoginRequiredModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </div>
   );
 }
