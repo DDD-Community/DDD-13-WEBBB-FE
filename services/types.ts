@@ -42,3 +42,5 @@ export type CommentTone = "VENT_WITH_ME" | "COMFORT_ME" | "WARM_ADVICE" | "MAKE_
 export type EmotionType = "ANXIETY" | "LETHARGY" | "LONELINESS" | "SELF_DEPRECATION" | "IRRITATION";
 
 export type MonsterStatus = "ALIVE" | "DEAD";
+
+export type PostOrder = "LATEST" | "POPULAR";

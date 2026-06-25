@@ -10,7 +10,7 @@ import useScrollLock from "@/hooks/useScrollLock";
 import { useState } from "react";
 import { FloatingPortal } from "@floating-ui/react";
 import TopBar from "@/components/TopBar";
-import type { JobRole, CareerYear } from "@/services/types";
+import type { JobRole, CareerYear, PostOrder } from "@/services/types";
 
 // 한글 라벨 ↔ 백엔드 enum 매핑 ("전체"는 필터 해제이므로 제외)
 const jobOptions: { label: string; value: JobRole }[] = [
@@ -36,18 +36,22 @@ const careerOptions: { label: string; value: CareerYear }[] = [
   { label: "7년차 이상", value: "YEAR_7_PLUS" },
 ];
 
-const sortOptions = ["최신순", "인기순"];
+const sortOptions: { label: string; value: PostOrder }[] = [
+  { label: "최신순", value: "LATEST" },
+  { label: "인기순", value: "POPULAR" },
+];
 
 interface FilterProps {
   jobRole: JobRole[];
   careerYear: CareerYear[];
+  order: PostOrder;
+  onOrderChange: (order: PostOrder) => void;
   onApply: (next: { jobRole: JobRole[]; careerYear: CareerYear[] }) => void;
 }
 
-export default function Filter({ jobRole, careerYear, onApply }: FilterProps) {
+export default function Filter({ jobRole, careerYear, order, onOrderChange, onApply }: FilterProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState<"job" | "career">("job");
-  const [sortOption, setSortOption] = useState(sortOptions[0]);
 
   // 모달 안에서의 임시(드래프트) 선택값. 모달 열 때 커밋된 값으로 초기화.
   const [jobDraft, setJobDraft] = useState<JobRole[]>(jobRole);
@@ -98,6 +102,8 @@ export default function Filter({ jobRole, careerYear, onApply }: FilterProps) {
     return `${labels[0]} 외 ${labels.length - 1}개`;
   }
 
+  const selectedSortLabel = sortOptions.find((option) => option.value === order)?.label ?? sortOptions[0].label;
+
   return (
     <>
       <div className="sticky top-17 z-10 flex items-center justify-between bg-black px-4 py-5">
@@ -127,7 +133,7 @@ export default function Filter({ jobRole, careerYear, onApply }: FilterProps) {
           ref={setReference}
           {...getReferenceProps()}
         >
-          <p className="text-body-14m">{sortOption}</p>
+          <p className="text-body-14m">{selectedSortLabel}</p>
           <ArrowDown className="h-4 w-4 flex-none" />
         </button>
       </div>
@@ -142,21 +148,21 @@ export default function Filter({ jobRole, careerYear, onApply }: FilterProps) {
             role="listbox"
           >
             {sortOptions.map((option) => {
-              const isSelected = option === sortOption;
+              const isSelected = option.value === order;
 
               return (
-                <li key={option}>
+                <li key={option.value}>
                   <button
                     type="button"
                     role="option"
                     aria-selected={isSelected}
                     className="flex w-full items-center gap-4 text-gray-50 aria-selected:text-white"
                     onClick={() => {
-                      setSortOption(option);
+                      onOrderChange(option.value);
                       setIsSortOpen(false);
                     }}
                   >
-                    <span>{option}</span>
+                    <span>{option.label}</span>
                     {isSelected && <Check className="h-5 w-5 flex-none" />}
                   </button>
                 </li>
