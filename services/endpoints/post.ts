@@ -1,5 +1,5 @@
 import { http } from "@/services/client";
-import type { JobRole, CareerYear, CommentTone, MonsterStatus } from "@/services/types";
+import type { JobRole, CareerYear, CommentTone, MonsterStatus, PostOrder } from "@/services/types";
 
 export interface PostAuthor {
   id: string;
@@ -77,6 +77,7 @@ export interface PostSaveBody {
 export interface GetPostsParams {
   cursor?: number | null;
   size?: number;
+  order?: PostOrder;
   jobRole?: JobRole[];
   careerYear?: CareerYear[];
 }
@@ -96,6 +97,7 @@ export const getPosts = (params: GetPostsParams = {}) => {
 
   if (params.cursor !== undefined && params.cursor !== null) queryParts.push(`cursor=${params.cursor}`);
   if (params.size !== undefined) queryParts.push(`size=${params.size}`);
+  if (params.order !== undefined) queryParts.push(`order=${encodeURIComponent(params.order)}`);
 
   if (params.jobRole && params.jobRole.length > 0) {
     params.jobRole.forEach((role) => queryParts.push(`jobRole=${encodeURIComponent(role)}`));
