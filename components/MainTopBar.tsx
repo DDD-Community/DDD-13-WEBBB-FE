@@ -24,7 +24,9 @@ export default function MainTopBar() {
   return (
     <>
       <div className="sticky top-0 z-10 flex h-17 items-center justify-between bg-black px-4">
-        <Image src="/logo.svg" alt="서비스 로고" width={98} height={28} priority />
+        <Link href="/home">
+          <Image src="/logo.svg" alt="서비스 로고" width={98} height={28} priority />
+        </Link>
 
         {isLoggedIn && (
           <div className="align-center flex gap-4">

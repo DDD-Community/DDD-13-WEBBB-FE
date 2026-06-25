@@ -1,11 +1,15 @@
 "use client";
 
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import { cva } from "class-variance-authority";
 import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 import Heart from "@/assets/icons/ic_heart.svg";
 import Comment from "@/assets/icons/ic_comment.svg";
 import type { CareerYear, CommentTone, EmotionType, JobRole } from "@/services/types";
+import { likePost, unlikePost } from "@/services/endpoints/post";
+import { myPageKeys, postKeys } from "@/services/query-keys";
 import CharacterChip from "./CharacterChip";
 import { CAREER_YEAR, CHARACTER_LABEL, COMMENT_TONE, JOB_ROLE } from "@/const/map";
 import { getTimeAgo } from "@/lib/date";
@@ -23,6 +27,7 @@ export type CharacterCardProps = {
   hp?: number;
   maxHp?: number;
   likeCount?: number;
+  likedByMe?: boolean;
   commentCount?: number;
   commentTone?: CommentTone;
 };
@@ -57,6 +62,14 @@ const characterBarStyle: (props: { character: EmotionType }) => string = cva(
   }
 );
 
+type LocalLikeState = {
+  postId: number;
+  isLiked: boolean;
+  likeCount: number;
+  hp: number;
+  maxHp: number;
+};
+
 export default function CharacterCard({
   profile = true,
   isAttacking = false,
@@ -70,9 +83,17 @@ export default function CharacterCard({
   hp,
   maxHp,
   likeCount,
+  likedByMe = false,
   commentCount,
   commentTone,
 }: CharacterCardProps) {
+  const queryClient = useQueryClient();
+  const likeAttackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [characterSizeKey] = useState<"lg" | "sm">(() => ((maxHp ?? 30) === 30 ? "lg" : "sm"));
+  const [localLikeState, setLocalLikeState] = useState<LocalLikeState | null>(null);
+  const [pendingPostId, setPendingPostId] = useState<number | null>(null);
+  const [isLikeAttacking, setIsLikeAttacking] = useState(false);
+
   const linkHref = postId ? `/post/${postId}` : undefined;
   const displayNickname = authorNickname || "닉네임";
   const displayJob = jobRole ? JOB_ROLE[jobRole] || "기타" : "개발";
@@ -81,19 +102,78 @@ export default function CharacterCard({
   const displayContent =
     contentPreview ||
     "이직 준비 시작하기 진짜 힘들다... 주말에 아무것도 안하고 누워있기만 함 ㅠㅠ 내 자신이 한심해. 어떻게 해야할까? 이직 준비 시작하기 진짜 힘들다... 주말에 아무것도 안하고 누워있기만 함 ㅠㅠ 내 자신이 한심해. 어떻게 해야할까? 이직 준비 시작하기 진짜 힘들다... 주말에 아무것도 안하고 누워있기만 함 ㅠㅠ 내 자신이 한심해. 어떻게 해야할까?";
+  const activeLikeState = localLikeState?.postId === postId ? localLikeState : null;
+  const isLiked = activeLikeState?.isLiked ?? likedByMe;
+  const currentLikeCount = activeLikeState?.likeCount ?? likeCount ?? 4;
+  const currentHp = activeLikeState?.hp ?? hp ?? 20;
+  const maximumHp = activeLikeState?.maxHp ?? maxHp ?? 30;
+  const isLikePending = pendingPostId === postId;
 
-  const currentHp = hp ?? 20;
-  const maximumHp = maxHp ?? 30;
   const hpPercent = maximumHp > 0 ? (currentHp / maximumHp) * 100 : 0;
 
   const isDead = currentHp <= 0;
-  const sizeKey = maximumHp === 30 ? "lg" : "sm"; // 30이면 큰 캐릭터, 그 외(10/20)는 작은 캐릭터
-  const characterSrc = `/characters/${type.toLowerCase()}/${sizeKey}${isDead ? "_dead" : ""}.svg`;
+  const characterSrc = `/characters/${type.toLowerCase()}/${characterSizeKey}${isDead ? "_dead" : ""}.svg`;
   const characterLabel = CHARACTER_LABEL[type];
   const supportText = commentTone ? COMMENT_TONE[commentTone] : "무조건 위로해주기";
 
-  const displayLikes = likeCount ?? 4;
   const displayComments = commentCount ?? 4;
+
+  const triggerLikeAttack = () => {
+    if (likeAttackTimerRef.current) clearTimeout(likeAttackTimerRef.current);
+    setIsLikeAttacking(true);
+    likeAttackTimerRef.current = setTimeout(() => setIsLikeAttacking(false), 3000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (likeAttackTimerRef.current) clearTimeout(likeAttackTimerRef.current);
+    };
+  }, []);
+
+  const handleLikeClick = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!postId || isLikePending) return;
+
+    const previousIsLiked = isLiked;
+    const previousLikeCount = currentLikeCount;
+    const previousHp = currentHp;
+    const previousMaxHp = maximumHp;
+    const previousLocalState = activeLikeState;
+    const nextIsLiked = !previousIsLiked;
+
+    setPendingPostId(postId);
+    setLocalLikeState({
+      postId,
+      isLiked: nextIsLiked,
+      likeCount: Math.max(0, previousLikeCount + (nextIsLiked ? 1 : -1)),
+      hp: previousHp,
+      maxHp: previousMaxHp,
+    });
+
+    try {
+      const response = nextIsLiked ? await likePost(postId) : await unlikePost(postId);
+
+      setLocalLikeState({
+        postId,
+        isLiked: nextIsLiked,
+        likeCount: response.likeCount,
+        hp: response.monster.hp,
+        maxHp: response.monster.maxHp,
+      });
+      void queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) });
+      void queryClient.invalidateQueries({ queryKey: myPageKeys.likedPosts() });
+      if (nextIsLiked) triggerLikeAttack();
+    } catch (error) {
+      setLocalLikeState(previousLocalState);
+      // eslint-disable-next-line no-console
+      console.error("게시글 좋아요 처리 실패:", error);
+    } finally {
+      setPendingPostId(null);
+    }
+  };
 
   const content = (
     <>
@@ -128,7 +208,7 @@ export default function CharacterCard({
             className="flex-none"
           />
 
-          {isAttacking && !isDead && (
+          {(isAttacking || isLikeAttacking) && !isDead && (
             <Image
               src="/characters/attack.svg"
               alt="공격 모션"
@@ -162,12 +242,14 @@ export default function CharacterCard({
         <div className="mt-5 flex w-full gap-3">
           <button
             type="button"
+            onClick={handleLikeClick}
+            aria-disabled={!postId || isLikePending}
             className="text-detail-13m text-gray-30 flex items-center gap-0.5 rounded-sm bg-black/30 px-2 py-1.25"
           >
-            <Heart className="fill-red-20 text-red-20 h-4 w-4 flex-none" />
+            <Heart className={`h-4 w-4 flex-none ${isLiked ? "fill-red-20 text-red-20" : "text-gray-30"}`} />
             <span>공감하기</span>
             <span>·</span>
-            <span>{displayLikes}</span>
+            <span>{currentLikeCount}</span>
           </button>
 
           <button

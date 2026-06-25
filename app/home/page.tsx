@@ -66,6 +66,7 @@ export default function HomePage() {
                       hp={post.monster?.hp}
                       maxHp={post.monster?.maxHp}
                       likeCount={post.likeCount}
+                      likedByMe={post.likedByMe}
                       commentCount={post.commentCount}
                       commentTone={post.commentTone}
                     />
