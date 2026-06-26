@@ -34,12 +34,16 @@ export interface EmailSignupBody {
 
 // 요청 함수 (순수, React 의존 없음) ──────────────────────────────────
 
-export const loginEmail = (body: EmailLoginBody) => http.post<AuthSuccess>("/api/auth/login/email", body);
+const PUBLIC_AUTH_REQUEST = { redirectOnUnauthorized: false } as const;
 
-export const signupEmail = (body: EmailSignupBody) => http.post<AuthSuccess>("/api/auth/signup/email", body);
+export const loginEmail = (body: EmailLoginBody) =>
+  http.post<AuthSuccess>("/api/auth/login/email", body, PUBLIC_AUTH_REQUEST);
+
+export const signupEmail = (body: EmailSignupBody) =>
+  http.post<AuthSuccess>("/api/auth/signup/email", body, PUBLIC_AUTH_REQUEST);
 
 export const checkEmail = (email: string) =>
-  http.get<{ available: boolean }>(`/api/auth/email/check?email=${encodeURIComponent(email)}`);
+  http.get<{ available: boolean }>(`/api/auth/email/check?email=${encodeURIComponent(email)}`, PUBLIC_AUTH_REQUEST);
 
 export const logout = () => http.post<null>("/api/auth/logout");
 
@@ -51,4 +55,5 @@ export type OAuthProvider = "google" | "kakao" | "naver";
 export const oauthAuthorizeUrl = (provider: OAuthProvider) => `/api/auth/oauth/${provider}/authorize`;
 
 /** 콜백에서 받은 1회용 code 를 JWT 로 교환하고 사용자 정보를 받음 (토큰은 httpOnly 쿠키로 저장됨) */
-export const exchangeOAuthCode = (code: string) => http.post<AuthUser>("/api/auth/oauth/exchange", { code });
+export const exchangeOAuthCode = (code: string) =>
+  http.post<AuthUser>("/api/auth/oauth/exchange", { code }, PUBLIC_AUTH_REQUEST);
