@@ -136,8 +136,6 @@ export default function CommentItem({ postId, comment, onLikeSuccess }: CommentI
     },
     onError: (error, _variables, context) => {
       queryClient.setQueryData(detailQueryKey, context?.previousPost);
-      // eslint-disable-next-line no-console
-      console.error("댓글 좋아요 처리 실패:", error);
     },
   });
   const isPending = commentLikeMutation.isPending;
