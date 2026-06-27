@@ -31,6 +31,10 @@ interface PostDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+type CommentLikeSuccess = {
+  isLiked: boolean;
+};
+
 export default function PostDetailPage({ params }: PostDetailPageProps) {
   const router = useRouter();
   const { id } = use(params);
@@ -164,6 +168,13 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
     if (nextIsLiked) triggerAttack();
   };
 
+  const handleCommentLikeSuccess = (update: CommentLikeSuccess) => {
+    void queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+    void queryClient.invalidateQueries({ queryKey: postKeys.detail(postId) });
+
+    if (update.isLiked) triggerAttack();
+  };
+
   return (
     <div className="min-h-screen bg-black pb-[120px]">
       <TopBar
@@ -267,7 +278,12 @@ export default function PostDetailPage({ params }: PostDetailPageProps) {
         ) : (
           <ul className="mt-[18px] flex list-none flex-col gap-6 px-4">
             {comments.map((comment) => (
-              <CommentItem key={comment.commentId} comment={comment} />
+              <CommentItem
+                key={comment.commentId}
+                postId={postId}
+                comment={comment}
+                onLikeSuccess={handleCommentLikeSuccess}
+              />
             ))}
           </ul>
         )}

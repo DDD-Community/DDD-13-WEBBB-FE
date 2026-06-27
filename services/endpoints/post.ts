@@ -23,8 +23,13 @@ export interface PostMonster {
 
 export interface PostComment {
   commentId: number;
+  authorId: string;
   authorNickname: string;
+  jobRole: JobRole | null;
+  careerYear: CareerYear | null;
   content: string;
+  likeCount: number;
+  likedByMe: boolean;
   createdAt: string;
 }
 
