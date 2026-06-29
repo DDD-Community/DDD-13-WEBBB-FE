@@ -114,7 +114,7 @@ export default function ForgotPassword() {
 
         <FormProvider {...emailMethods}>
           <form
-            className="mt-8.5 flex grow flex-col gap-21.5 px-4"
+            className="mt-8.5 flex grow flex-col gap-21.5 px-4 pb-20"
             onSubmit={handleEmailSubmit((data) => sendCode(data))}
           >
             <FormField label="이메일 주소" name="email">
