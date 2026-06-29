@@ -59,3 +59,21 @@ export const onboardingSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
+
+export const forgotPasswordEmailSchema = z.object({
+  email: emailSchema,
+});
+
+export const forgotPasswordConfirmSchema = z
+  .object({
+    code: z.string().length(6, { message: "6자리 코드를 입력해주세요." }),
+    newPassword: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((v) => v.newPassword === v.confirmPassword, {
+    message: "비밀번호가 일치하지 않습니다.",
+    path: ["confirmPassword"],
+  });
+
+export type ForgotPasswordEmailInput = z.infer<typeof forgotPasswordEmailSchema>;
+export type ForgotPasswordConfirmInput = z.infer<typeof forgotPasswordConfirmSchema>;
