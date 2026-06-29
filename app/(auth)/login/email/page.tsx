@@ -104,6 +104,10 @@ export default function EmailLogin() {
             />
           </FormField>
 
+          <Link href="/forgot-password" className="text-detail-13m self-end text-gray-50">
+            비밀번호를 잊으셨나요?
+          </Link>
+
           <button
             type="submit"
             className="text-head-18sb bg-blue-20 disabled:bg-gray-80 mt-auto rounded-xl py-3 text-black"
