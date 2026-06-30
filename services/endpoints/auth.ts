@@ -57,3 +57,9 @@ export const oauthAuthorizeUrl = (provider: OAuthProvider) => `/api/auth/oauth/$
 /** 콜백에서 받은 1회용 code 를 JWT 로 교환하고 사용자 정보를 받음 (토큰은 httpOnly 쿠키로 저장됨) */
 export const exchangeOAuthCode = (code: string) =>
   http.post<AuthUser>("/api/auth/oauth/exchange", { code }, PUBLIC_AUTH_REQUEST);
+
+export const requestPasswordReset = (email: string) =>
+  http.post<null>("/api/auth/password-reset/request", { email }, PUBLIC_AUTH_REQUEST);
+
+export const confirmPasswordReset = (email: string, code: string, newPassword: string) =>
+  http.post<null>("/api/auth/password-reset/confirm", { email, code, newPassword }, PUBLIC_AUTH_REQUEST);
