@@ -32,7 +32,14 @@ export default function CommentInput({
     setIsFocused(false);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
+      textareaRef.current.blur();
     }
+  };
+
+  // 사파리는 버튼 클릭 시 버튼에 포커스를 주지 않아 blur 의 relatedTarget 이 null 이 됨
+  // → handleBlur 가 입력을 초기화해 제출이 무시되므로, mousedown 단계에서 포커스 이동 자체를 막는다
+  const keepFocus = (e: React.MouseEvent) => {
+    e.preventDefault();
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLDivElement>) => {
@@ -81,6 +88,7 @@ export default function CommentInput({
         {isFocused && (
           <button
             type="button"
+            onMouseDown={keepFocus}
             onClick={handleCancel}
             className="text-gray-40 text-body-14m flex h-[32px] w-[52px] shrink-0 items-center justify-center rounded-[4px] text-center"
           >
@@ -90,6 +98,7 @@ export default function CommentInput({
 
         <button
           type="button"
+          onMouseDown={keepFocus}
           onClick={handleSubmit}
           disabled={commentText.trim().length === 0 || isSubmitting}
           className={`flex h-[32px] w-[52px] shrink-0 items-center justify-center rounded-[4px] text-center transition-colors ${
